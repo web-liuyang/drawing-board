@@ -69,12 +69,12 @@ export class Canvas {
       this.setTransform(matrix);
     };
 
-    const onmouseupForDown = (e: MouseEvent): void => {
+    const onmouseupForDown = (): void => {
       window.removeEventListener("mousemove", onmousemoveForDown, false);
       window.removeEventListener("mouseup", onmouseupForDown, false);
     };
 
-    const onmousedown = (e: MouseEvent): void => {
+    const onmousedown = (): void => {
       window.addEventListener("mousemove", onmousemoveForDown, false);
       window.addEventListener("mouseup", onmouseupForDown, false);
     };

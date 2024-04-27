@@ -45,7 +45,7 @@ export class DrawingBoard {
       this.render();
     });
 
-    canvas.addMousemoveListener(e => {});
+    canvas.addMousemoveListener(() => {});
   }
 
   public render(): void {
