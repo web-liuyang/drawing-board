@@ -1,0 +1,14 @@
+{
+  "name": "drawing-board",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "repository": "git@github.com:web-liuyang/drawing-board.git",
+  "author": "web-liuyang <984584014@qq.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite"
+  },
+  "devDependencies": {
+    "vite": "^5.2.10"
+  }
+}
