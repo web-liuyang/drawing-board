@@ -38,5 +38,8 @@
       "prettier --parset=typescript --write",
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.35"
   }
 }
