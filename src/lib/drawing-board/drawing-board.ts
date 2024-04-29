@@ -47,8 +47,6 @@ export class DrawingBoard {
     canvas.addMatrixListener(() => {
       this.render();
     });
-
-    canvas.addMousemoveListener(() => {});
   }
 
   private background(ctx: CanvasRenderingContext2D): void {

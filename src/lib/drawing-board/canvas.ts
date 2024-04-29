@@ -1,6 +1,8 @@
-import type { ChangeCallback, ValueCallback } from "../notifier/notifier";
+import type { ChangeCallback } from "../notifier/notifier";
 import { Matrix } from "../matrix";
-import { ChangeNotifier, ValueNotifier } from "../notifier";
+import { ChangeNotifier } from "../notifier";
+import { CanvasEventStateMachine } from "./canvas-event-state-machine/canvas-event-state-machine";
+import { SelectionEventStateMachine } from "./canvas-event-state-machine/selection-event-state-machine";
 
 /**
  * [x, y, w, h]
@@ -11,22 +13,27 @@ export interface CanvasOptions {
   width: number;
   height: number;
   matrix?: Matrix;
+  state?: CanvasEventStateMachine;
 }
 
 export class Canvas {
   private oCanvas!: HTMLCanvasElement;
 
-  private matrixNotifier: ChangeNotifier = new ChangeNotifier();
+  private state!: CanvasEventStateMachine;
 
-  private mousemoveNotifier: ValueNotifier<MouseEvent> = new ValueNotifier<MouseEvent>(new MouseEvent(""));
+  private matrixNotifier: ChangeNotifier = new ChangeNotifier();
 
   private options: CanvasOptions;
 
-  private matrix!: Matrix;
+  private _matrix!: Matrix;
 
   private _viewbox: Viewbox = [0, 0, 0, 0];
 
-  public get viewbox() {
+  public get matrix(): Matrix {
+    return this._matrix.clone();
+  }
+
+  public get viewbox(): Viewbox {
     return [...this._viewbox];
   }
 
@@ -44,8 +51,14 @@ export class Canvas {
 
   public ensureInitialized(): void {
     this.initDOM();
+    this.initState();
     this.bindEvent();
     this.setTransform(this.options.matrix ?? new Matrix([1, 0, 0, 1, 0, 0]));
+  }
+
+  private initState() {
+    const { state } = this.options;
+    this.state = state ?? new SelectionEventStateMachine(this);
   }
 
   private initDOM() {
@@ -63,46 +76,16 @@ export class Canvas {
   }
 
   private bindEvent(): void {
-    const onmousemoveForDown = (e: MouseEvent): void => {
-      const [x, y] = [e.movementX, e.movementY];
-      const matrix = this.matrix.translate(x, y);
-      this.setTransform(matrix);
-    };
-
-    const onmouseupForDown = (): void => {
-      window.removeEventListener("mousemove", onmousemoveForDown, false);
-      window.removeEventListener("mouseup", onmouseupForDown, false);
-    };
-
-    const onmousedown = (): void => {
-      window.addEventListener("mousemove", onmousemoveForDown, false);
-      window.addEventListener("mouseup", onmouseupForDown, false);
-    };
-
-    const onwheel = (e: WheelEvent): void => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const sign = Math.sign(e.deltaY);
-      const position = this.toGlobal([e.clientX, e.clientY]);
-      const scale = sign > 0 ? 0.9 : 1.1;
-      const matrix = this.matrix.scale(scale, scale, position);
-      this.setTransform(matrix);
-    };
-
-    const onmousemove = (e: MouseEvent): void => {
-      this.mousemoveNotifier.notifyListeners(e);
-    };
-
-    this.oCanvas.addEventListener("mousedown", onmousedown, false);
-    this.oCanvas.addEventListener("wheel", onwheel, false);
-    this.oCanvas.addEventListener("mousemove", onmousemove, false);
+    this.oCanvas.addEventListener("wheel", e => this.state.onwheel(e), false);
+    this.oCanvas.addEventListener("mousedown", e => this.state.onmousedown(e), false);
+    this.oCanvas.addEventListener("mousemove", e => this.state.onmousemove(e), false);
+    this.oCanvas.addEventListener("mouseup", e => this.state.onmouseup(e), false);
   }
 
   public setTransform(matrix: Matrix): void {
     const ctx = this.ctx;
     ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
-    this.matrix = matrix;
+    this._matrix = matrix;
     this.setLineWidth(matrix);
     this.setViewbox(matrix);
     this.matrixNotifier.notifyListeners();
@@ -120,7 +103,7 @@ export class Canvas {
 
   public toGlobal(point: Point): Point {
     const [startX, startY] = this._viewbox;
-    const { a, d } = this.matrix;
+    const { a, d } = this._matrix;
     const [x, y] = point;
 
     return [startX + x / a, startY + y / d];
@@ -135,7 +118,7 @@ export class Canvas {
     this.matrixNotifier.addListener(cb);
   }
 
-  public addMousemoveListener(cb: ValueCallback<MouseEvent>): void {
-    this.mousemoveNotifier.addListener(cb);
+  public setState(state: CanvasEventStateMachine): void {
+    this.state = state;
   }
 }
