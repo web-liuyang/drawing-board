@@ -78,4 +78,8 @@ export class Matrix {
 
     return matrix;
   }
+
+  public clone(): Matrix {
+    return new Matrix(this.matrixArray);
+  }
 }
