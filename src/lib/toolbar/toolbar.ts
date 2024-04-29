@@ -4,7 +4,7 @@ import { ValueNotifier } from "../notifier";
 import "@vscode/codicons/dist/codicon.css";
 import "./index.css";
 
-export enum ToolButtons {
+export enum ToolState {
   Selection = "Selection",
   Circle = "Circle",
   Rectangle = "Rectangle",
@@ -13,7 +13,7 @@ export enum ToolButtons {
 export class Toolbar {
   private oToolbar!: HTMLElement;
 
-  public readonly toolState: ValueNotifier<ToolButtons> = new ValueNotifier<ToolButtons>(ToolButtons.Selection);
+  public readonly state: ValueNotifier<ToolState> = new ValueNotifier<ToolState>(ToolState.Selection);
 
   public get node(): HTMLElement {
     return this.oToolbar;
@@ -25,19 +25,19 @@ export class Toolbar {
   }
 
   private bindEvent(): void {
-    this.toolState.addListener(() => {
+    this.state.addListener(() => {
       this.render();
     });
   }
 
-  private createIconButton(type: ToolButtons, icon: string): HTMLElement {
+  private createIconButton(type: ToolState, icon: string): HTMLElement {
     const oButton = document.createElement("button");
     oButton.className = "toolbar__button " + iconName(icon);
-    if (this.toolState.value === type) oButton.className += " selected";
+    if (this.state.value === type) oButton.className += " selected";
     oButton.title = type;
 
     const onclick = () => {
-      this.toolState.value = type;
+      this.state.value = type;
     };
 
     oButton.addEventListener("click", onclick, false);
@@ -50,9 +50,9 @@ export class Toolbar {
   }
 
   private createToolButton(): HTMLElement[] {
-    const oSelection = this.createIconButton(ToolButtons.Selection, "blank");
-    const oCircle = this.createIconButton(ToolButtons.Circle, "circle");
-    const oRectangle = this.createIconButton(ToolButtons.Rectangle, "primitive-square");
+    const oSelection = this.createIconButton(ToolState.Selection, "blank");
+    const oCircle = this.createIconButton(ToolState.Circle, "circle");
+    const oRectangle = this.createIconButton(ToolState.Rectangle, "primitive-square");
     return [oSelection, oCircle, oRectangle];
   }
 

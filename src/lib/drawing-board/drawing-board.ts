@@ -1,5 +1,7 @@
+import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machine";
 import { absoluteError } from "../math";
 import { Canvas } from "./canvas";
+import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { Controller } from "./controller";
 import { Draw } from "./draw";
 
@@ -19,6 +21,10 @@ export class DrawingBoard {
 
   get node(): HTMLCanvasElement {
     return this.canvas.node;
+  }
+
+  public setCanvasState(State: new (options: CanvasEventStateMachineOptinos) => CanvasEventStateMachine): void {
+    this.canvas.state = new State(this.canvas);
   }
 
   constructor(options: DrawingBoardOptions) {

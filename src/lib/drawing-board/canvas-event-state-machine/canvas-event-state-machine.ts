@@ -7,10 +7,12 @@ export interface CanvasEvent {
   onmouseup(e: MouseEvent): void;
 }
 
+export type CanvasEventStateMachineOptinos = Canvas;
+
 export abstract class CanvasEventStateMachine implements CanvasEvent {
   protected canvas: Canvas;
 
-  constructor(canvas: Canvas) {
+  constructor(canvas: CanvasEventStateMachineOptinos) {
     this.canvas = canvas;
   }
 

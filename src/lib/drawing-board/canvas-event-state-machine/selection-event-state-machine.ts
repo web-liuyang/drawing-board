@@ -2,10 +2,8 @@ import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 
 export class SelectionEventStateMachine extends CanvasEventStateMachine {
   onmousedown(): void {
-    this.canvas.setState(new SelectionMousedownStateMachine(this.canvas));
+    this.canvas.state = new SelectionMousedownStateMachine(this.canvas);
   }
-
-  onmousemove(): void {}
 
   onwheel(e: WheelEvent): void {
     e.preventDefault();
@@ -21,8 +19,6 @@ export class SelectionEventStateMachine extends CanvasEventStateMachine {
 }
 
 class SelectionMousedownStateMachine extends CanvasEventStateMachine {
-  onmousedown(): void {}
-
   onmousemove(e: MouseEvent): void {
     const canvas = this.canvas;
     const [x, y] = [e.movementX, e.movementY];
@@ -31,6 +27,6 @@ class SelectionMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   onmouseup(): void {
-    this.canvas.setState(new SelectionEventStateMachine(this.canvas));
+    this.canvas.state = new SelectionEventStateMachine(this.canvas);
   }
 }

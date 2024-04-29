@@ -1,8 +1,7 @@
 import type { ChangeCallback } from "../notifier/notifier";
 import { Matrix } from "../matrix";
 import { ChangeNotifier } from "../notifier";
-import { CanvasEventStateMachine } from "./canvas-event-state-machine/canvas-event-state-machine";
-import { SelectionEventStateMachine } from "./canvas-event-state-machine/selection-event-state-machine";
+import { CanvasEventStateMachine, SelectionEventStateMachine } from "./canvas-event-state-machine";
 
 /**
  * [x, y, w, h]
@@ -19,7 +18,7 @@ export interface CanvasOptions {
 export class Canvas {
   private oCanvas!: HTMLCanvasElement;
 
-  private state!: CanvasEventStateMachine;
+  private _state!: CanvasEventStateMachine;
 
   private matrixNotifier: ChangeNotifier = new ChangeNotifier();
 
@@ -28,6 +27,14 @@ export class Canvas {
   private _matrix!: Matrix;
 
   private _viewbox: Viewbox = [0, 0, 0, 0];
+
+  public get state(): CanvasEventStateMachine {
+    return this._state;
+  }
+
+  public set state(state: CanvasEventStateMachine) {
+    this._state = state;
+  }
 
   public get matrix(): Matrix {
     return this._matrix.clone();
@@ -58,7 +65,7 @@ export class Canvas {
 
   private initState() {
     const { state } = this.options;
-    this.state = state ?? new SelectionEventStateMachine(this);
+    state ? (this._state = state) : this.resetState();
   }
 
   private initDOM() {
@@ -76,10 +83,10 @@ export class Canvas {
   }
 
   private bindEvent(): void {
-    this.oCanvas.addEventListener("wheel", e => this.state.onwheel(e), false);
-    this.oCanvas.addEventListener("mousedown", e => this.state.onmousedown(e), false);
-    this.oCanvas.addEventListener("mousemove", e => this.state.onmousemove(e), false);
-    this.oCanvas.addEventListener("mouseup", e => this.state.onmouseup(e), false);
+    this.oCanvas.addEventListener("wheel", e => this._state.onwheel(e), false);
+    this.oCanvas.addEventListener("mousedown", e => this._state.onmousedown(e), false);
+    this.oCanvas.addEventListener("mousemove", e => this._state.onmousemove(e), false);
+    this.oCanvas.addEventListener("mouseup", e => this._state.onmouseup(e), false);
   }
 
   public setTransform(matrix: Matrix): void {
@@ -118,7 +125,7 @@ export class Canvas {
     this.matrixNotifier.addListener(cb);
   }
 
-  public setState(state: CanvasEventStateMachine): void {
-    this.state = state;
+  public resetState(): void {
+    this._state = new SelectionEventStateMachine(this);
   }
 }

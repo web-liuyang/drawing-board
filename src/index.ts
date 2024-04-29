@@ -1,6 +1,8 @@
 import { DrawingBoard, Toolbar } from "./lib";
+import { SelectionEventStateMachine } from "./lib/drawing-board/canvas-event-state-machine";
 import { Circle } from "./lib/graph/circle";
 import { Rectangle } from "./lib/graph/rectangle";
+import { ToolState } from "./lib/toolbar/toolbar";
 
 (window => {
   const oApp = document.getElementById("app")!;
@@ -17,6 +19,17 @@ import { Rectangle } from "./lib/graph/rectangle";
   const toolbar = new Toolbar();
   toolbar.ensureInitialized();
   toolbar.render();
+
+  toolbar.state.addListener((state: ToolState) => {
+    const ToolStateToCanvasState = {
+      [ToolState.Selection]: SelectionEventStateMachine,
+      [ToolState.Circle]: SelectionEventStateMachine,
+      [ToolState.Rectangle]: SelectionEventStateMachine,
+    };
+
+    const canvasState = ToolStateToCanvasState[state];
+    drawingBoard.setCanvasState(canvasState);
+  });
 
   oApp.appendChild(drawingBoard.node);
   oApp.appendChild(toolbar.node);
