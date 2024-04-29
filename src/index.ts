@@ -1,7 +1,7 @@
 import { DrawingBoard, Toolbar } from "./lib";
-import { SelectionEventStateMachine } from "./lib/canvas/canvas-event-state-machine";
-import { Circle } from "./lib/graph/circle";
-import { Rectangle } from "./lib/graph/rectangle";
+import { SelectionEventStateMachine, CircleEventStateMachine } from "./lib/canvas/canvas-event-state-machine";
+import { Circle, generateUUID } from "./lib/graph";
+import { Rectangle } from "./lib/graph";
 import { ToolState } from "./lib/toolbar/toolbar";
 
 (window => {
@@ -12,8 +12,10 @@ import { ToolState } from "./lib/toolbar/toolbar";
   });
 
   drawingBoard.ensureInitialized();
-  drawingBoard.controller.addGraph(new Circle({ id: 1, center: [0, 0], radius: 50 }));
-  drawingBoard.controller.addGraph(new Rectangle({ id: 2, width: 100, height: 100, center: [100, 100] }));
+  drawingBoard.graphController.addGraph(new Circle({ id: generateUUID(), center: [0, 0], radius: 50 }));
+  drawingBoard.graphController.addGraph(
+    new Rectangle({ id: generateUUID(), width: 100, height: 100, center: [100, 100] }),
+  );
   drawingBoard.render();
 
   const toolbar = new Toolbar();
@@ -23,7 +25,7 @@ import { ToolState } from "./lib/toolbar/toolbar";
   toolbar.state.addListener((state: ToolState) => {
     const ToolStateToCanvasState = {
       [ToolState.Selection]: SelectionEventStateMachine,
-      [ToolState.Circle]: SelectionEventStateMachine,
+      [ToolState.Circle]: CircleEventStateMachine,
       [ToolState.Rectangle]: SelectionEventStateMachine,
     };
 

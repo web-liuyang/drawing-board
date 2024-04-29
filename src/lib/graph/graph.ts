@@ -3,7 +3,7 @@ export interface Drawable {
 }
 
 export interface GraphOptions {
-  id: number;
+  id: string;
 }
 
 export abstract class Graph implements Drawable {
