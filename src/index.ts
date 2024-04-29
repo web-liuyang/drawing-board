@@ -1,5 +1,5 @@
 import { DrawingBoard, Toolbar } from "./lib";
-import { SelectionEventStateMachine } from "./lib/drawing-board/canvas-event-state-machine";
+import { SelectionEventStateMachine } from "./lib/canvas/canvas-event-state-machine";
 import { Circle } from "./lib/graph/circle";
 import { Rectangle } from "./lib/graph/rectangle";
 import { ToolState } from "./lib/toolbar/toolbar";

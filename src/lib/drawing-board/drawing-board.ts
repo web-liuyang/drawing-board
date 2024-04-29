@@ -1,7 +1,7 @@
-import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machine";
+import type { CanvasEventStateMachineOptinos } from "../canvas/canvas-event-state-machine";
 import { absoluteError } from "../math";
-import { Canvas } from "./canvas";
-import { CanvasEventStateMachine } from "./canvas-event-state-machine";
+import { Canvas } from "../canvas/canvas";
+import { CanvasEventStateMachine } from "../canvas/canvas-event-state-machine";
 import { Controller } from "./controller";
 import { Draw } from "./draw";
 
