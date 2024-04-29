@@ -2,7 +2,7 @@ import type { CanvasEventStateMachineOptinos } from "../canvas/canvas-event-stat
 import { absoluteError } from "../math";
 import { Canvas } from "../canvas/canvas";
 import { CanvasEventStateMachine } from "../canvas/canvas-event-state-machine";
-import { Controller } from "./controller";
+import { GraphController } from "./graph-controller";
 import { Draw } from "./draw";
 
 export interface DrawingBoardOptions {
@@ -17,7 +17,7 @@ export class DrawingBoard {
 
   private draw!: Draw;
 
-  public readonly controller: Controller = new Controller();
+  public readonly graphController: GraphController = new GraphController();
 
   get node(): HTMLCanvasElement {
     return this.canvas.node;
@@ -39,7 +39,7 @@ export class DrawingBoard {
 
   private initCanvas(): void {
     const { width, height } = this.options;
-    this.canvas = new Canvas({ width, height });
+    this.canvas = new Canvas({ width, height, graphController: this.graphController });
     this.canvas.ensureInitialized();
   }
 
@@ -48,9 +48,13 @@ export class DrawingBoard {
   }
 
   private bindEvent(): void {
-    const canvas = this.canvas;
+    const { canvas, graphController } = this;
 
     canvas.addMatrixListener(() => {
+      this.render();
+    });
+
+    graphController.addListener(() => {
       this.render();
     });
   }
@@ -83,7 +87,7 @@ export class DrawingBoard {
   public render(): void {
     this.canvas.clean();
     const ctx = this.canvas.ctx;
-    const graphs = this.controller.graphs;
+    const graphs = this.graphController.graphs;
     this.background(ctx);
 
     for (const graph of graphs) {

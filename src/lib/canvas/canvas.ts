@@ -2,6 +2,8 @@ import type { ChangeCallback } from "../notifier/notifier";
 import { Matrix } from "../matrix";
 import { ChangeNotifier } from "../notifier";
 import { CanvasEventStateMachine, SelectionEventStateMachine } from "./canvas-event-state-machine";
+import type { GraphController } from "../drawing-board/graph-controller";
+import type { Graph } from "../graph";
 
 /**
  * [x, y, w, h]
@@ -11,18 +13,21 @@ type Viewbox = [number, number, number, number];
 export interface CanvasOptions {
   width: number;
   height: number;
+  graphController: GraphController;
   matrix?: Matrix;
   state?: CanvasEventStateMachine;
 }
 
 export class Canvas {
+  private options: CanvasOptions;
+
   private oCanvas!: HTMLCanvasElement;
 
   private _state!: CanvasEventStateMachine;
 
-  private matrixNotifier: ChangeNotifier = new ChangeNotifier();
+  private graphController!: GraphController;
 
-  private options: CanvasOptions;
+  private matrixNotifier: ChangeNotifier = new ChangeNotifier();
 
   private _matrix!: Matrix;
 
@@ -57,10 +62,12 @@ export class Canvas {
   }
 
   public ensureInitialized(): void {
+    const { graphController, matrix = new Matrix([1, 0, 0, 1, 0, 0]) } = this.options;
+    this.graphController = graphController;
     this.initDOM();
     this.initState();
     this.bindEvent();
-    this.setTransform(this.options.matrix ?? new Matrix([1, 0, 0, 1, 0, 0]));
+    this.setTransform(matrix);
   }
 
   private initState() {
@@ -127,5 +134,9 @@ export class Canvas {
 
   public resetState(): void {
     this._state = new SelectionEventStateMachine(this);
+  }
+
+  public addGraph(graph: Graph) {
+    this.graphController.addGraph(graph);
   }
 }
