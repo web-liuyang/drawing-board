@@ -1,4 +1,6 @@
+import { absoluteError } from "../math";
 import { Canvas } from "./canvas";
+import { Controller } from "./controller";
 import { Draw } from "./draw";
 
 export interface DrawingBoardOptions {
@@ -13,6 +15,8 @@ export class DrawingBoard {
 
   private draw!: Draw;
 
+  public readonly controller: Controller = new Controller();
+
   get node(): HTMLCanvasElement {
     return this.canvas.node;
   }
@@ -25,7 +29,6 @@ export class DrawingBoard {
     this.initCanvas();
     this.initDraw();
     this.bindEvent();
-    this.render();
   }
 
   private initCanvas(): void {
@@ -48,12 +51,39 @@ export class DrawingBoard {
     canvas.addMousemoveListener(() => {});
   }
 
+  private background(ctx: CanvasRenderingContext2D): void {
+    const [x, y, w, h] = this.canvas.viewbox;
+    const gap = 20;
+    const xLen = Math.ceil(absoluteError(x, x + w) / gap) + 1;
+    const yLen = Math.ceil(absoluteError(y, y + h) / gap) + 1;
+    const xStart = x - (x % gap);
+    const yStart = y - (y % gap);
+    const path = new Path2D();
+
+    for (let i = 0; i < xLen; i++) {
+      path.moveTo(xStart + i * gap, y);
+      path.lineTo(xStart + i * gap, y + h);
+    }
+
+    for (let i = 0; i < yLen; i++) {
+      path.moveTo(x, yStart + i * gap);
+      path.lineTo(x + w, yStart + i * gap);
+    }
+
+    const strokeStyle = ctx.strokeStyle;
+    ctx.strokeStyle = "grey";
+    ctx.stroke(path);
+    ctx.strokeStyle = strokeStyle;
+  }
+
   public render(): void {
     this.canvas.clean();
     const ctx = this.canvas.ctx;
-    ctx.beginPath();
-    ctx.arc(0, 0, 50, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.closePath();
+    const graphs = this.controller.graphs;
+    this.background(ctx);
+
+    for (const graph of graphs) {
+      graph.paint(ctx);
+    }
   }
 }
