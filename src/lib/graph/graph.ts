@@ -6,6 +6,8 @@ export interface GraphOptions {
   id: string;
 }
 
+export type CloneParameter<T> = Partial<Omit<T, "id">>;
+
 export abstract class Graph implements Drawable {
   public readonly id: GraphOptions["id"];
 
@@ -14,4 +16,6 @@ export abstract class Graph implements Drawable {
   }
 
   public abstract paint(ctx: CanvasRenderingContext2D): void;
+
+  public abstract clone(options: CloneParameter<unknown>): Graph;
 }

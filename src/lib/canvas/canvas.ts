@@ -139,4 +139,8 @@ export class Canvas {
   public addGraph(graph: Graph) {
     this.graphController.addGraph(graph);
   }
+
+  public updateGraph(id: string, newGraph: Graph) {
+    this.graphController.updateGraph(id, newGraph);
+  }
 }

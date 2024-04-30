@@ -1,4 +1,5 @@
-import { Graph, GraphOptions } from "./graph";
+import type { CloneParameter, GraphOptions } from "./graph";
+import { Graph } from "./graph";
 
 export interface CircleOptions extends GraphOptions {
   center: Point;
@@ -23,5 +24,13 @@ export class Circle extends Graph {
 
     path.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.stroke(path);
+  }
+
+  public clone(options: CloneParameter<CircleOptions>): Circle {
+    return new Circle({
+      id: this.id,
+      center: options.center ?? this.center,
+      radius: options.radius ?? this.radius,
+    });
   }
 }

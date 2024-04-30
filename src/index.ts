@@ -1,5 +1,10 @@
 import { DrawingBoard, Toolbar } from "./lib";
-import { SelectionEventStateMachine, CircleEventStateMachine } from "./lib/canvas/canvas-event-state-machine";
+import {
+  SelectionEventStateMachine,
+  CircleEventStateMachine,
+  RectangleEventStateMachine,
+} from "./lib/canvas/canvas-event-state-machine";
+
 import { Circle, generateUUID } from "./lib/graph";
 import { Rectangle } from "./lib/graph";
 import { ToolState } from "./lib/toolbar/toolbar";
@@ -26,7 +31,7 @@ import { ToolState } from "./lib/toolbar/toolbar";
     const ToolStateToCanvasState = {
       [ToolState.Selection]: SelectionEventStateMachine,
       [ToolState.Circle]: CircleEventStateMachine,
-      [ToolState.Rectangle]: SelectionEventStateMachine,
+      [ToolState.Rectangle]: RectangleEventStateMachine,
     };
 
     const canvasState = ToolStateToCanvasState[state];
