@@ -31,12 +31,17 @@ const DrawStateToToolState = {
   });
 
   drawingBoard.ensureInitialized();
-  drawingBoard.graphController.addGraph(new Circle({ id: generateUUID(), center: [0, 0], radius: 50 }));
   drawingBoard.graphController.addGraph(
-    Rectangle.fromCenter({ id: generateUUID(), width: 100, height: 100, x: 0, y: 0 }),
+    new Circle({ id: generateUUID(), center: [0, 0], radius: 50, selected: false }),
   );
   drawingBoard.graphController.addGraph(
-    Rectangle.fromCenter({ id: generateUUID(), width: 100, height: 100, x: 100, y: 100 }),
+    new Circle({ id: generateUUID(), center: [100, 0], radius: 50, selected: false }),
+  );
+  drawingBoard.graphController.addGraph(
+    Rectangle.fromCenter({ id: generateUUID(), width: 100, height: 100, x: 0, y: 0, selected: false }),
+  );
+  drawingBoard.graphController.addGraph(
+    Rectangle.fromCenter({ id: generateUUID(), width: 100, height: 100, x: 100, y: 100, selected: false }),
   );
   drawingBoard.render();
 

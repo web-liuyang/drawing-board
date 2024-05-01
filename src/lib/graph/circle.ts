@@ -1,5 +1,6 @@
 import type { CopyWithParameter, GraphOptions } from "./graph";
 import { Graph } from "./graph";
+import { Rectangle } from "./rectangle";
 
 export interface CircleOptions extends GraphOptions {
   center: Point;
@@ -31,6 +32,7 @@ export class Circle extends Graph {
       id: this.id,
       center: options.center ?? this.center,
       radius: options.radius ?? this.radius,
+      selected: options.selected ?? this.selected,
     });
   }
 
@@ -47,6 +49,51 @@ export class Circle extends Graph {
   }
 
   public towingPointPaint(ctx: CanvasRenderingContext2D): void {
-    console.log(this);
+    const size = 10;
+    const {
+      center: [x, y],
+      radius,
+    } = this;
+
+    const leftTop = Rectangle.fromCenter({
+      id: "leftTop",
+      x: x - radius,
+      y: y - radius,
+      width: size,
+      height: size,
+      selected: false,
+    });
+
+    const leftBottom = Rectangle.fromCenter({
+      id: "leftBottom",
+      x: x - radius,
+      y: y + radius,
+      width: size,
+      height: size,
+      selected: false,
+    });
+
+    const rightTop = Rectangle.fromCenter({
+      id: "rightTop",
+      x: x + radius,
+      y: y - radius,
+      width: size,
+      height: size,
+      selected: false,
+    });
+
+    const rightBottom = Rectangle.fromCenter({
+      id: "rightBottom",
+      x: x + radius,
+      y: y + radius,
+      width: size,
+      height: size,
+      selected: false,
+    });
+
+    leftTop.paint(ctx);
+    leftBottom.paint(ctx);
+    rightTop.paint(ctx);
+    rightBottom.paint(ctx);
   }
 }
