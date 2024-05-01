@@ -1,10 +1,13 @@
 import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machine";
 import { Circle, generateUUID } from "../../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
+import { MouseEventButton } from "../../constant/event";
 
 export class CircleEventStateMachine extends CanvasEventStateMachine {
   onmousedown(e: MouseEvent): void {
-    const canvas = this.canvas;
+    if (e.button !== MouseEventButton.Primary) return;
+
+    const { canvas } = this;
     const origin = canvas.toGlobal([e.clientX, e.clientY]);
     const circle = new Circle({
       id: generateUUID(),
@@ -12,8 +15,8 @@ export class CircleEventStateMachine extends CanvasEventStateMachine {
       radius: 0,
     });
 
-    canvas.addGraph(circle);
-    canvas.state = new CircleMousedownStateMachine(this.canvas, circle);
+    canvas.graphController.addGraph(circle);
+    canvas.drawState.value = new CircleMousedownStateMachine(this.canvas, circle);
   }
 }
 
@@ -25,9 +28,10 @@ class CircleMousedownStateMachine extends CanvasEventStateMachine {
     this.circle = circle;
   }
 
-  onmousedown(): void {
+  onmousedown(e: MouseEvent): void {
+    if (e.button !== MouseEventButton.Primary) return;
     const { canvas } = this;
-    canvas.state = new CircleEventStateMachine(canvas);
+    canvas.drawState.value = new CircleEventStateMachine(canvas);
   }
 
   onmousemove(e: MouseEvent): void {
@@ -35,7 +39,13 @@ class CircleMousedownStateMachine extends CanvasEventStateMachine {
     const position = canvas.toGlobal([e.clientX, e.clientY]);
     const [x, y] = [position[0] - circle.center[0], position[1] - circle.center[1]];
     const radius = Math.max(Math.abs(x), Math.abs(y));
-    const newCircle = circle.clone({ radius });
-    canvas.updateGraph(circle.id, newCircle);
+    const newCircle = circle.copyWith({ radius });
+    canvas.graphController.updateGraph(circle.id, newCircle);
+  }
+
+  onescape(): void {
+    const { canvas, circle } = this;
+    canvas.graphController.removeGraph(circle.id);
+    canvas.drawState.value = new CircleEventStateMachine(canvas);
   }
 }

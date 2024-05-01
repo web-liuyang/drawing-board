@@ -1,8 +1,36 @@
+import type { GraphId } from "../../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
+import { MouseEventButton } from "../../constant/event";
 
 export class SelectionEventStateMachine extends CanvasEventStateMachine {
-  onmousedown(): void {
-    this.canvas.state = new SelectionMousedownStateMachine(this.canvas);
+  private hasKeydown: boolean = false;
+
+  onmousedown(e: MouseEvent): void {
+    if (e.button !== MouseEventButton.Primary) return;
+    this.hasKeydown = true;
+  }
+
+  onmousemove(e: MouseEvent): void {
+    if (!this.hasKeydown) return;
+    this.canvas.drawState.value = new SelectionMousedownStateMachine(this.canvas);
+  }
+
+  onmouseup(e: MouseEvent): void {
+    this.hasKeydown = false;
+    const { canvas } = this;
+    const position = canvas.toGlobal([e.clientX, e.clientY]);
+    const graphs = canvas.graphController.graphs;
+    let hitGraphId: GraphId | undefined;
+
+    for (let i = graphs.length - 1; i >= 0; i--) {
+      const graph = graphs[i];
+      if (graph.hit(position)) {
+        hitGraphId = graph.id;
+        break;
+      }
+    }
+
+    canvas.selectedGraphIdNotifier.value = hitGraphId;
   }
 
   onwheel(e: WheelEvent): void {
@@ -27,6 +55,6 @@ class SelectionMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   onmouseup(): void {
-    this.canvas.state = new SelectionEventStateMachine(this.canvas);
+    this.canvas.drawState.value = new SelectionEventStateMachine(this.canvas);
   }
 }
