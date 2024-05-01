@@ -1,4 +1,4 @@
-import type { Graph } from "../graph";
+import type { Graph, GraphId } from "../graph";
 import { ChangeNotifier } from "../notifier";
 
 export class GraphController extends ChangeNotifier {
@@ -13,18 +13,18 @@ export class GraphController extends ChangeNotifier {
     this.notifyListeners();
   }
 
-  public findGraph(id: Graph["id"]): Graph | undefined {
-    return this._graphs.find(g => g.id === id);
+  public findGraph<T extends Graph>(id: GraphId): T | undefined {
+    return this._graphs.find(g => g.id === id) as T | undefined;
   }
 
-  public updateGraph(id: Graph["id"], newGraph: Graph): void {
+  public updateGraph(id: GraphId, newGraph: Graph): void {
     const index = this._graphs.findIndex(g => g.id === id);
     if (index === -1) return;
     this._graphs[index] = newGraph;
     this.notifyListeners();
   }
 
-  public removeGraph(id: Graph["id"]): void {
+  public removeGraph(id: GraphId): void {
     const index = this._graphs.findIndex(g => g.id === id);
     if (index === -1) return;
     this._graphs.splice(index, 1);
