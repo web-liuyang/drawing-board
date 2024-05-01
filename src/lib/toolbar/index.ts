@@ -1,1 +1,1 @@
-export { Toolbar } from "./toolbar";
+export { Toolbar, ToolState } from "./toolbar";
