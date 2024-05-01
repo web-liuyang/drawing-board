@@ -1,0 +1,1 @@
+export { absoluteError } from "./math";

@@ -16,6 +16,9 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: "module",
   },
+  ignorePatterns: ["**/*.css"],
   plugins: ["@typescript-eslint"],
-  rules: {},
+  rules: {
+    "@typescript-eslint/no-unused-vars": "warn",
+  },
 };
