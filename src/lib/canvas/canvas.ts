@@ -1,9 +1,9 @@
 import type { ChangeCallback } from "../notifier/notifier";
-import { Matrix } from "../matrix";
-import { ChangeNotifier } from "../notifier";
-import { CanvasEventStateMachine, SelectionEventStateMachine } from "./canvas-event-state-machine";
 import type { GraphController } from "../drawing-board/graph-controller";
-import type { Graph } from "../graph";
+import { Matrix } from "../matrix";
+import { ChangeNotifier, ValueNotifier } from "../notifier";
+import { CanvasEventStateMachine, SelectionEventStateMachine } from "./canvas-event-state-machine";
+import { GraphId } from "../graph";
 
 /**
  * [x, y, w, h]
@@ -14,6 +14,7 @@ export interface CanvasOptions {
   width: number;
   height: number;
   graphController: GraphController;
+  selectedGraphIdNotifier: ValueNotifier<GraphId | undefined>;
   matrix?: Matrix;
   state?: CanvasEventStateMachine;
 }
@@ -23,9 +24,13 @@ export class Canvas {
 
   private oCanvas!: HTMLCanvasElement;
 
-  private _state!: CanvasEventStateMachine;
+  public readonly drawState: ValueNotifier<CanvasEventStateMachine> = new ValueNotifier<CanvasEventStateMachine>(
+    new SelectionEventStateMachine(this),
+  );
 
-  private graphController!: GraphController;
+  private _graphController!: GraphController;
+
+  private _selectedGraphIdNotifier!: ValueNotifier<GraphId | undefined>;
 
   private matrixNotifier: ChangeNotifier = new ChangeNotifier();
 
@@ -33,12 +38,12 @@ export class Canvas {
 
   private _viewbox: Viewbox = [0, 0, 0, 0];
 
-  public get state(): CanvasEventStateMachine {
-    return this._state;
+  public get graphController() {
+    return this._graphController;
   }
 
-  public set state(state: CanvasEventStateMachine) {
-    this._state = state;
+  public get selectedGraphIdNotifier() {
+    return this._selectedGraphIdNotifier;
   }
 
   public get matrix(): Matrix {
@@ -62,18 +67,25 @@ export class Canvas {
   }
 
   public ensureInitialized(): void {
-    const { graphController, matrix = new Matrix([1, 0, 0, 1, 0, 0]) } = this.options;
-    this.graphController = graphController;
+    const { width, height } = this.options;
+    const {
+      graphController,
+      selectedGraphIdNotifier: selectedGraphNotifier,
+      matrix = new Matrix([1, 0, 0, 1, width / 2, height / 2]),
+    } = this.options;
+
+    this._graphController = graphController;
+    this._selectedGraphIdNotifier = selectedGraphNotifier;
     this.initDOM();
-    this.initState();
+    // this.initState();
     this.bindEvent();
     this.setTransform(matrix);
   }
 
-  private initState() {
-    const { state } = this.options;
-    state ? (this._state = state) : this.resetState();
-  }
+  // private initState() {
+  //   const { state } = this.options;
+  //   state ? (this._state = state) : this.resetState();
+  // }
 
   private initDOM() {
     this.oCanvas = this.createCanvas();
@@ -90,10 +102,12 @@ export class Canvas {
   }
 
   private bindEvent(): void {
-    this.oCanvas.addEventListener("wheel", e => this._state.onwheel(e), false);
-    this.oCanvas.addEventListener("mousedown", e => this._state.onmousedown(e), false);
-    this.oCanvas.addEventListener("mousemove", e => this._state.onmousemove(e), false);
-    this.oCanvas.addEventListener("mouseup", e => this._state.onmouseup(e), false);
+    const drawState = this.drawState;
+    window.addEventListener("keydown", e => drawState.value.onkeydown(e), false);
+    this.oCanvas.addEventListener("wheel", e => drawState.value.onwheel(e), false);
+    this.oCanvas.addEventListener("mousedown", e => drawState.value.onmousedown(e), false);
+    this.oCanvas.addEventListener("mousemove", e => drawState.value.onmousemove(e), false);
+    this.oCanvas.addEventListener("mouseup", e => drawState.value.onmouseup(e), false);
   }
 
   public setTransform(matrix: Matrix): void {
@@ -132,15 +146,19 @@ export class Canvas {
     this.matrixNotifier.addListener(cb);
   }
 
-  public resetState(): void {
-    this._state = new SelectionEventStateMachine(this);
-  }
+  // public resetState(): void {
+  //   this._state = new SelectionEventStateMachine(this);
+  // }
 
-  public addGraph(graph: Graph) {
-    this.graphController.addGraph(graph);
-  }
+  // public addGraph(graph: Graph) {
+  //   this._graphController.addGraph(graph);
+  // }
 
-  public updateGraph(id: string, newGraph: Graph) {
-    this.graphController.updateGraph(id, newGraph);
-  }
+  // public updateGraph(id: GraphId, newGraph: Graph) {
+  //   this._graphController.updateGraph(id, newGraph);
+  // }
+
+  // public removeGraph(id: GraphId) {
+  //   this._graphController.removeGraph(id);
+  // }
 }
