@@ -10,7 +10,7 @@ export class SelectionEventStateMachine extends CanvasEventStateMachine {
     this.hasKeydown = true;
   }
 
-  onmousemove(e: MouseEvent): void {
+  onmousemove(): void {
     if (!this.hasKeydown) return;
     this.canvas.drawState.value = new SelectionMousedownStateMachine(this.canvas);
   }
