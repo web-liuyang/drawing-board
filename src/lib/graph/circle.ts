@@ -1,4 +1,4 @@
-import type { CloneParameter, GraphOptions } from "./graph";
+import type { CopyWithParameter, GraphOptions } from "./graph";
 import { Graph } from "./graph";
 
 export interface CircleOptions extends GraphOptions {
@@ -26,11 +26,27 @@ export class Circle extends Graph {
     ctx.stroke(path);
   }
 
-  public clone(options: CloneParameter<CircleOptions>): Circle {
+  public copyWith(options: CopyWithParameter<CircleOptions>): Circle {
     return new Circle({
       id: this.id,
       center: options.center ?? this.center,
       radius: options.radius ?? this.radius,
     });
+  }
+
+  public hit(point: Point): boolean {
+    const [x, y] = point;
+    const {
+      center: [cx, cy],
+      radius,
+    } = this;
+
+    if (Math.pow(x - cx, 2) + Math.pow(y - cy, 2) <= Math.pow(radius, 2)) return true;
+
+    return false;
+  }
+
+  public towingPointPaint(ctx: CanvasRenderingContext2D): void {
+    console.log(this);
   }
 }

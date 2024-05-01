@@ -2,11 +2,13 @@ export interface Drawable {
   paint(ctx: CanvasRenderingContext2D): void;
 }
 
+export type GraphId = string;
+
 export interface GraphOptions {
-  id: string;
+  id: GraphId;
 }
 
-export type CloneParameter<T> = Partial<Omit<T, "id">>;
+export type CopyWithParameter<T> = Partial<Omit<T, "id">>;
 
 export abstract class Graph implements Drawable {
   public readonly id: GraphOptions["id"];
@@ -17,5 +19,9 @@ export abstract class Graph implements Drawable {
 
   public abstract paint(ctx: CanvasRenderingContext2D): void;
 
-  public abstract clone(options: CloneParameter<unknown>): Graph;
+  public abstract copyWith(options: CopyWithParameter<unknown>): Graph;
+
+  public abstract hit(point: Point): boolean;
+
+  public abstract towingPointPaint(ctx: CanvasRenderingContext2D): void;
 }
