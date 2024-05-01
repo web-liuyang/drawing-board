@@ -23,7 +23,7 @@ export class Rectangle extends Graph {
   static fromCenter(options: RectangleFromCenterOptions): Rectangle {
     const [x1, y1] = [options.x - options.width / 2, options.y - options.height / 2];
     const [x2, y2] = [options.x + options.width / 2, options.y + options.height / 2];
-    const { id } = options;
+    const { id, selected } = options;
 
     return new Rectangle({
       id,
@@ -31,6 +31,7 @@ export class Rectangle extends Graph {
       y1,
       x2,
       y2,
+      selected,
     });
   }
 
@@ -76,6 +77,7 @@ export class Rectangle extends Graph {
       y1: options.y1 ?? this.y1,
       x2: options.x2 ?? this.x2,
       y2: options.y2 ?? this.y2,
+      selected: options.selected ?? this.selected,
     });
   }
 
@@ -87,6 +89,47 @@ export class Rectangle extends Graph {
   }
 
   public towingPointPaint(ctx: CanvasRenderingContext2D): void {
-    console.log(this);
+    const size = 10;
+    const { x1, y1, x2, y2 } = this;
+    const leftTop = new Rectangle({
+      id: "leftTop",
+      x1: x1 - size / 2,
+      y1: y1 - size / 2,
+      x2: x1 + size / 2,
+      y2: y1 + size / 2,
+      selected: false,
+    });
+
+    const leftBottom = new Rectangle({
+      id: "leftBottom",
+      x1: x1 - size / 2,
+      y1: y2 - size / 2,
+      x2: x1 + size / 2,
+      y2: y2 + size / 2,
+      selected: false,
+    });
+
+    const rightTop = new Rectangle({
+      id: "rightTop",
+      x1: x2 - size / 2,
+      y1: y1 - size / 2,
+      x2: x2 + size / 2,
+      y2: y1 + size / 2,
+      selected: false,
+    });
+
+    const rightBottom = new Rectangle({
+      id: "rightBottom",
+      x1: x2 - size / 2,
+      y1: y2 - size / 2,
+      x2: x2 + size / 2,
+      y2: y2 + size / 2,
+      selected: false,
+    });
+
+    leftTop.paint(ctx);
+    leftBottom.paint(ctx);
+    rightTop.paint(ctx);
+    rightBottom.paint(ctx);
   }
 }

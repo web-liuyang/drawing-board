@@ -2,10 +2,8 @@ import type { CanvasEventStateMachineOptinos } from "../canvas/canvas-event-stat
 import { absoluteError } from "../math";
 import { Canvas } from "../canvas/canvas";
 import { CanvasEventStateMachine } from "../canvas/canvas-event-state-machine";
-import { GraphController } from "./graph-controller";
-import { Draw } from "./draw";
+import { GraphController } from "../graph/graph-controller";
 import { ValueNotifier } from "../notifier";
-import { GraphId } from "../graph";
 
 export interface DrawingBoardOptions {
   width: number;
@@ -18,10 +16,6 @@ export class DrawingBoard {
   private canvas!: Canvas;
 
   public readonly graphController: GraphController = new GraphController();
-
-  public readonly selectedGraphIdNotifier: ValueNotifier<GraphId | undefined> = new ValueNotifier<GraphId | undefined>(
-    undefined,
-  );
 
   get node(): HTMLCanvasElement {
     return this.canvas.node;
@@ -46,23 +40,18 @@ export class DrawingBoard {
       width,
       height,
       graphController: this.graphController,
-      selectedGraphIdNotifier: this.selectedGraphIdNotifier,
     });
     this.canvas.ensureInitialized();
   }
 
   private bindEvent(): void {
-    const { canvas, graphController, selectedGraphIdNotifier } = this;
+    const { canvas, graphController } = this;
 
     canvas.addMatrixListener(() => {
       this.render();
     });
 
     graphController.addListener(() => {
-      this.render();
-    });
-
-    selectedGraphIdNotifier.addListener(() => {
       this.render();
     });
   }
@@ -94,18 +83,14 @@ export class DrawingBoard {
 
   public render(): void {
     this.canvas.clean();
+
     const ctx = this.canvas.ctx;
-    const graphs = this.graphController.graphs;
-    const selectedGraphId = this.selectedGraphIdNotifier.value;
     this.background(ctx);
 
+    const graphs = this.graphController.graphs;
     for (const graph of graphs) {
       graph.paint(ctx);
-    }
-
-    if (selectedGraphId) {
-      const selectedGraph = this.graphController.findGraph(selectedGraphId);
-      if (selectedGraph) selectedGraph.towingPointPaint(ctx);
+      if (graph.selected) graph.towingPointPaint(ctx);
     }
   }
 

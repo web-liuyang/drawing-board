@@ -1,5 +1,5 @@
 import type { ChangeCallback } from "../notifier/notifier";
-import type { GraphController } from "../drawing-board/graph-controller";
+import type { GraphController } from "../graph/graph-controller";
 import { Matrix } from "../matrix";
 import { ChangeNotifier, ValueNotifier } from "../notifier";
 import { CanvasEventStateMachine, SelectionEventStateMachine } from "./canvas-event-state-machine";
@@ -14,7 +14,6 @@ export interface CanvasOptions {
   width: number;
   height: number;
   graphController: GraphController;
-  selectedGraphIdNotifier: ValueNotifier<GraphId | undefined>;
   matrix?: Matrix;
   state?: CanvasEventStateMachine;
 }
@@ -68,24 +67,13 @@ export class Canvas {
 
   public ensureInitialized(): void {
     const { width, height } = this.options;
-    const {
-      graphController,
-      selectedGraphIdNotifier: selectedGraphNotifier,
-      matrix = new Matrix([1, 0, 0, 1, width / 2, height / 2]),
-    } = this.options;
+    const { graphController, matrix = new Matrix([1, 0, 0, 1, width / 2, height / 2]) } = this.options;
 
     this._graphController = graphController;
-    this._selectedGraphIdNotifier = selectedGraphNotifier;
     this.initDOM();
-    // this.initState();
     this.bindEvent();
     this.setTransform(matrix);
   }
-
-  // private initState() {
-  //   const { state } = this.options;
-  //   state ? (this._state = state) : this.resetState();
-  // }
 
   private initDOM() {
     this.oCanvas = this.createCanvas();
@@ -145,20 +133,4 @@ export class Canvas {
   public addMatrixListener(cb: ChangeCallback): void {
     this.matrixNotifier.addListener(cb);
   }
-
-  // public resetState(): void {
-  //   this._state = new SelectionEventStateMachine(this);
-  // }
-
-  // public addGraph(graph: Graph) {
-  //   this._graphController.addGraph(graph);
-  // }
-
-  // public updateGraph(id: GraphId, newGraph: Graph) {
-  //   this._graphController.updateGraph(id, newGraph);
-  // }
-
-  // public removeGraph(id: GraphId) {
-  //   this._graphController.removeGraph(id);
-  // }
 }
