@@ -12,6 +12,12 @@ export class GraphController extends ChangeNotifier {
     return this._graphs.filter(g => g.selected);
   }
 
+  public setGraphs(graphs: Graph[]): void {
+    this._graphs.length = 0;
+    this._graphs.push(...graphs);
+    this.notifyListeners();
+  }
+
   public addGraph(graph: Graph): void {
     this._graphs.push(graph);
     this.notifyListeners();

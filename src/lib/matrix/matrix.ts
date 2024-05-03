@@ -20,12 +20,12 @@ export class Matrix {
 
   public d: number;
 
-  public tx: number;
+  public e: number;
 
-  public ty: number;
+  public f: number;
 
   get matrixArray(): MatrixArray {
-    return [this.a, this.b, this.c, this.d, this.tx, this.ty];
+    return [this.a, this.b, this.c, this.d, this.e, this.f];
   }
 
   constructor(matrixArray: MatrixArray = [1, 0, 0, 1, 0, 0]) {
@@ -33,8 +33,8 @@ export class Matrix {
     this.b = matrixArray[1];
     this.c = matrixArray[2];
     this.d = matrixArray[3];
-    this.tx = matrixArray[4];
-    this.ty = matrixArray[5];
+    this.e = matrixArray[4];
+    this.f = matrixArray[5];
   }
 
   /**

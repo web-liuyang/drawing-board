@@ -1,25 +1,25 @@
-import type { Graph } from "../../graph";
+import type { Graph } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
-import { MouseEventButton } from "../../constant/event";
+import { MouseEventButton } from "../constant/event";
 
 export class SelectionEventStateMachine extends CanvasEventStateMachine {
   private hasKeydown: boolean = false;
 
-  onmousedown(e: MouseEvent): void {
+  override onMousedown(e: MouseEvent): void {
     if (e.button !== MouseEventButton.Primary) return;
     this.hasKeydown = true;
   }
 
-  onmousemove(): void {
+  override onMousemove(): void {
     if (!this.hasKeydown) return;
-    this.canvas.drawState.value = new SelectionMousedownStateMachine(this.canvas);
+    this.application.drawState = new SelectionMousedownStateMachine(this.application);
   }
 
-  onmouseup(e: MouseEvent): void {
+  override onMouseup(e: MouseEvent): void {
     this.hasKeydown = false;
-    const { canvas } = this;
-    const position = canvas.toGlobal([e.clientX, e.clientY]);
-    const graphs = canvas.graphController.graphs;
+
+    const position = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const graphs = this.application.graphController.graphs;
 
     const newGraphs: Graph[] = Array(graphs.length);
     let hasSelected = false;
@@ -43,31 +43,29 @@ export class SelectionEventStateMachine extends CanvasEventStateMachine {
       newGraphs[i] = graph;
     }
 
-    canvas.graphController.updateGraphs(newGraphs);
+    this.application.graphController.updateGraphs(newGraphs);
   }
 
-  onwheel(e: WheelEvent): void {
+  override onWheel(e: WheelEvent): void {
     e.preventDefault();
     e.stopPropagation();
-
-    const canvas = this.canvas;
+    const { interactiveCanvas } = this.application;
     const sign = Math.sign(e.deltaY);
-    const position = canvas.toGlobal([e.clientX, e.clientY]);
+    const position = interactiveCanvas.toGlobal([e.clientX, e.clientY]);
     const scale = sign > 0 ? 0.9 : 1.1;
-    const matrix = canvas.matrix.scale(scale, scale, position);
-    canvas.setTransform(matrix);
+    const matrix = interactiveCanvas.matrix.scale(scale, scale, position);
+    interactiveCanvas.setTransform(matrix);
   }
 }
 
 class SelectionMousedownStateMachine extends CanvasEventStateMachine {
-  onmousemove(e: MouseEvent): void {
-    const canvas = this.canvas;
+  override onMousemove(e: MouseEvent): void {
     const [x, y] = [e.movementX, e.movementY];
-    const matrix = canvas.matrix.translate(x, y);
-    canvas.setTransform(matrix);
+    const matrix = this.application.interactiveCanvas.matrix.translate(x, y);
+    this.application.interactiveCanvas.setTransform(matrix);
   }
 
-  onmouseup(): void {
-    this.canvas.drawState.value = new SelectionEventStateMachine(this.canvas);
+  override onMouseup(): void {
+    this.application.drawState = new SelectionEventStateMachine(this.application);
   }
 }

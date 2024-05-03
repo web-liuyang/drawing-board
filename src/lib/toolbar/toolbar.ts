@@ -4,43 +4,53 @@ import { ValueNotifier } from "../notifier";
 import "@vscode/codicons/dist/codicon.css";
 import "./index.css";
 
-export enum ToolState {
+export enum ToolButton {
+  Backward = "Backward",
+  Forward = "Forward",
   Selection = "Selection",
   Circle = "Circle",
   Rectangle = "Rectangle",
 }
 
+interface ToolbarOptions {
+  onClick: (button: ToolButton) => void;
+}
+
 export class Toolbar {
+  private onClick: ToolbarOptions["onClick"];
+
+  private _seletedToolButton: ToolButton = ToolButton.Selection;
+
+  public get seletedToolButton(): ToolButton {
+    return this._seletedToolButton;
+  }
+
+  public set seletedToolButton(button: ToolButton) {
+    this._seletedToolButton = button;
+  }
+
   private oToolbar!: HTMLElement;
 
-  public readonly state: ValueNotifier<ToolState> = new ValueNotifier<ToolState>(ToolState.Selection);
+  constructor(options: ToolbarOptions) {
+    this.onClick = options.onClick;
+    this.initDOM();
+    this.bindEvent();
+  }
 
   public get node(): HTMLElement {
     return this.oToolbar;
   }
 
-  public ensureInitialized(): void {
-    this.initDOM();
-    this.bindEvent();
-  }
-
   private bindEvent(): void {
-    this.state.addListener(() => {
-      this.render();
-    });
+    // this.state.addListener(() => {
+    //   this.render();
+    // });
   }
 
-  private createIconButton(type: ToolState, icon: string): HTMLElement {
+  private createIconButton(title: string, icon: string): HTMLElement {
     const oButton = document.createElement("button");
     oButton.className = "toolbar__button " + iconName(icon);
-    if (this.state.value === type) oButton.className += " selected";
-    oButton.title = type;
-
-    const onclick = () => {
-      this.state.value = type;
-    };
-
-    oButton.addEventListener("click", onclick, false);
+    oButton.title = title;
     return oButton;
   }
 
@@ -49,11 +59,24 @@ export class Toolbar {
     this.oToolbar.className = "toolbar";
   }
 
-  private createToolButton(): HTMLElement[] {
-    const oSelection = this.createIconButton(ToolState.Selection, "blank");
-    const oCircle = this.createIconButton(ToolState.Circle, "circle");
-    const oRectangle = this.createIconButton(ToolState.Rectangle, "primitive-square");
-    return [oSelection, oCircle, oRectangle];
+  private createToolButton(button: ToolButton, icon: string): HTMLElement {
+    const oButton = this.createIconButton(button, icon);
+    const onclick = () => this.onClick(button);
+    if (this.seletedToolButton === button) oButton.className += " selected";
+    oButton.title = button;
+    oButton.addEventListener("click", onclick, false);
+
+    return oButton;
+  }
+
+  private createToolButtons(): HTMLElement[] {
+    const oBackward = this.createToolButton(ToolButton.Backward, "debug-step-back");
+    const oForward = this.createToolButton(ToolButton.Forward, "debug-step-over");
+    const oSelection = this.createToolButton(ToolButton.Selection, "blank");
+    const oCircle = this.createToolButton(ToolButton.Circle, "circle");
+    const oRectangle = this.createToolButton(ToolButton.Rectangle, "primitive-square");
+
+    return [oBackward, oForward, oSelection, oCircle, oRectangle];
   }
 
   private clean() {
@@ -66,7 +89,7 @@ export class Toolbar {
 
   public render(): void {
     this.clean();
-    const oToolButtons = this.createToolButton();
+    const oToolButtons = this.createToolButtons();
     this.oToolbar.append(...oToolButtons);
   }
 }
