@@ -34,12 +34,12 @@ export function isPointInPolygon(point: Point, polygon: Point[]) {
  * 先把A的abcd应用给B的tx,ty，然后A与B的abcd相乘，txty相加
  */
 export function multiply(mA: Matrix, mB: Matrix): Matrix {
-  const a = mA.a * mB.a + mA.c * mB.b + mA.tx * 0;
-  const b = mA.b * mB.a + mA.d * mB.b + mA.ty * 0;
-  const c = mA.a * mB.c + mA.c * mB.d + mA.tx * 0;
-  const d = mA.b * mB.c + mA.d * mB.d + mA.ty * 0;
-  const tx = mA.a * mB.tx + mA.c * mB.ty + mA.tx * 1;
-  const ty = mA.b * mB.tx + mA.d * mB.ty + mA.ty * 1;
+  const a = mA.a * mB.a + mA.c * mB.b + mA.e * 0;
+  const b = mA.b * mB.a + mA.d * mB.b + mA.f * 0;
+  const c = mA.a * mB.c + mA.c * mB.d + mA.e * 0;
+  const d = mA.b * mB.c + mA.d * mB.d + mA.f * 0;
+  const tx = mA.a * mB.e + mA.c * mB.f + mA.e * 1;
+  const ty = mA.b * mB.e + mA.d * mB.f + mA.f * 1;
 
   const matrixArray: MatrixArray = [a, b, c, d, tx, ty];
 
