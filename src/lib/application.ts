@@ -9,6 +9,7 @@ import {
   HistoryController,
   InteractiveCanvas,
   Matrix,
+  Statusbar,
 } from ".";
 
 const ToolButtonToDrawState = {
@@ -29,6 +30,8 @@ class ApplicationState {
 
 export class Application {
   public readonly toolbar: Toolbar;
+
+  public readonly statusbar: Statusbar;
 
   private readonly container: HTMLElement;
 
@@ -64,6 +67,8 @@ export class Application {
         },
         onMousemove: (e: MouseEvent) => {
           this.drawState.onMousemove(e);
+          this.statusbar.mousePosition = this.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+          this.render();
         },
         onMouseup: (e: MouseEvent) => {
           this.drawState.onMouseup(e);
@@ -75,6 +80,7 @@ export class Application {
             this.drawState.onEscape();
           } else {
             this.toolbar.seletedToolButton = ToolButton.Selection;
+            this.statusbar.stateText = ToolButton.Selection;
           }
           this.render();
         },
@@ -103,16 +109,20 @@ export class Application {
         const DrawState = ToolButtonToDrawState[button];
         if (DrawState) {
           this.drawState = new DrawState(this);
+          this.statusbar.stateText = button;
         }
         this.render();
       },
     });
 
+    this.statusbar = new Statusbar();
+    this.statusbar.stateText = ToolButton.Selection;
+
     this.graphController.addListener(() => {
       this.render();
     });
 
-    this.container.append(this.interactiveCanvas.node, this.toolbar.node);
+    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node);
   }
 
   private drawGraphs(ctx: CanvasRenderingContext2D, graphs: Graph[]): void {
@@ -126,6 +136,7 @@ export class Application {
     this.interactiveCanvas.render();
     this.drawGraphs(this.interactiveCanvas.ctx, this.graphController.graphs);
     this.toolbar.render();
+    this.statusbar.render();
   }
 
   public saveState() {
