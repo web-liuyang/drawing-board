@@ -16,7 +16,9 @@ export interface GraphOptions {
 
 export type CopyWithParameter<T extends GraphOptions> = Partial<Omit<T, "id">>;
 
-export abstract class Graph<T extends GraphOptions> implements Drawable, Cloneable<CopyWithParameter<T>> {
+export abstract class Graph<T extends GraphOptions = GraphOptions>
+  implements Drawable, Cloneable<CopyWithParameter<T>>
+{
   public readonly id: T["id"];
 
   public readonly selected: boolean;

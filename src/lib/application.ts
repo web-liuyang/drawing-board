@@ -10,6 +10,7 @@ import {
   InteractiveCanvas,
   Matrix,
   Statusbar,
+  Propertybar,
 } from ".";
 
 const ToolButtonToDrawState = {
@@ -32,6 +33,8 @@ export class Application {
   public readonly toolbar: Toolbar;
 
   public readonly statusbar: Statusbar;
+
+  public readonly propertybar: Propertybar;
 
   private readonly container: HTMLElement;
 
@@ -118,11 +121,13 @@ export class Application {
     this.statusbar = new Statusbar();
     this.statusbar.stateText = ToolButton.Selection;
 
+    this.propertybar = new Propertybar();
+
     this.graphController.addListener(() => {
       this.render();
     });
 
-    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node);
+    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertybar.node);
   }
 
   private drawGraphs(ctx: CanvasRenderingContext2D, graphs: Graph[]): void {
