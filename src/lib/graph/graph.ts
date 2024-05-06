@@ -1,3 +1,6 @@
+import { Style } from "./style";
+import { getStyle } from "./utils";
+
 export interface Drawable {
   paint(ctx: CanvasRenderingContext2D): void;
 }
@@ -8,28 +11,47 @@ export interface GraphOptions {
   id: GraphId;
   selected?: boolean;
   editing?: boolean;
+  style?: Style;
 }
 
 export type CopyWithParameter<T extends GraphOptions> = Partial<Omit<T, "id">>;
 
-export abstract class Graph implements Drawable {
-  public readonly id: GraphOptions["id"];
+export abstract class Graph<T extends GraphOptions> implements Drawable, Cloneable<CopyWithParameter<T>> {
+  public readonly id: T["id"];
 
   public readonly selected: boolean;
 
   public readonly editing: boolean;
 
-  constructor(options: GraphOptions) {
+  public readonly style: Style;
+
+  constructor(options: T) {
     this.id = options.id;
     this.selected = options.selected ?? false;
     this.editing = options.editing ?? false;
+    this.style = options.style ?? Style.default();
   }
 
   public abstract paint(ctx: CanvasRenderingContext2D): void;
 
-  public abstract copyWith(options: CopyWithParameter<GraphOptions>): Graph;
+  public abstract copyWith(options: CopyWithParameter<T>): Graph<T>;
 
   public abstract hit(point: Point): boolean;
 
   public abstract towingPointPaint(ctx: CanvasRenderingContext2D): void;
+
+  public draw(ctx: CanvasRenderingContext2D, fn: () => void): void {
+    const style = getStyle(ctx);
+    this.applyStyle(ctx, this.style);
+    fn();
+    this.applyStyle(ctx, style);
+  }
+
+  private applyStyle(ctx: CanvasRenderingContext2D, style: Style): void {
+    ctx.strokeStyle = style.stroke.color;
+    ctx.lineWidth = style.stroke.width;
+    ctx.lineCap = style.stroke.cap;
+    ctx.lineJoin = style.stroke.join;
+    ctx.fillStyle = style.fill.color;
+  }
 }

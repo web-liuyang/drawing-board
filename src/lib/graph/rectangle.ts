@@ -19,7 +19,7 @@ export interface RectangleFromCenterOptions extends GraphOptions {
   height: number;
 }
 
-export class Rectangle extends Graph {
+export class Rectangle extends Graph<RectangleOptions> {
   static fromCenter(options: RectangleFromCenterOptions): Rectangle {
     const [x1, y1] = [options.x - options.width / 2, options.y - options.height / 2];
     const [x2, y2] = [options.x + options.width / 2, options.y + options.height / 2];
@@ -66,8 +66,10 @@ export class Rectangle extends Graph {
     const [x, y, w, h] = [x1, y1, x2 - x1, y2 - y1];
     const path = new Path2D();
 
-    path.rect(x, y, w, h);
-    ctx.stroke(path);
+    this.draw(ctx, () => {
+      path.rect(x, y, w, h);
+      ctx.stroke(path);
+    });
   }
 
   public copyWith(options: CopyWithParameter<RectangleOptions>): Rectangle {
@@ -78,6 +80,7 @@ export class Rectangle extends Graph {
       x2: options.x2 ?? this.x2,
       y2: options.y2 ?? this.y2,
       selected: options.selected ?? this.selected,
+      style: options.style ?? this.style,
     });
   }
 

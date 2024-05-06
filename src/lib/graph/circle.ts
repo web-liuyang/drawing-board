@@ -7,7 +7,7 @@ export interface CircleOptions extends GraphOptions {
   radius: number;
 }
 
-export class Circle extends Graph {
+export class Circle extends Graph<CircleOptions> {
   public readonly radius: number;
 
   public readonly center: Point;
@@ -22,9 +22,10 @@ export class Circle extends Graph {
     const [x, y] = this.center;
     const radius = this.radius;
     const path = new Path2D();
-
-    path.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.stroke(path);
+    this.draw(ctx, () => {
+      path.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.stroke(path);
+    });
   }
 
   public copyWith(options: CopyWithParameter<CircleOptions>): Circle {
@@ -33,6 +34,7 @@ export class Circle extends Graph {
       center: options.center ?? this.center,
       radius: options.radius ?? this.radius,
       selected: options.selected ?? this.selected,
+      style: options.style ?? this.style,
     });
   }
 
