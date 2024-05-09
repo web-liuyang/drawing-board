@@ -34,6 +34,7 @@ export class Circle extends Graph<CircleOptions> {
       center: options.center ?? this.center,
       radius: options.radius ?? this.radius,
       selected: options.selected ?? this.selected,
+      editing: options.editing ?? this.editing,
       style: options.style ?? this.style,
     });
   }

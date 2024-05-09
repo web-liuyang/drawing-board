@@ -80,6 +80,7 @@ export class Rectangle extends Graph<RectangleOptions> {
       x2: options.x2 ?? this.x2,
       y2: options.y2 ?? this.y2,
       selected: options.selected ?? this.selected,
+      editing: options.editing ?? this.editing,
       style: options.style ?? this.style,
     });
   }
