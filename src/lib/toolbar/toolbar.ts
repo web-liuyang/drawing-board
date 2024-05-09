@@ -1,5 +1,4 @@
 import { iconName } from "../icon";
-import { ValueNotifier } from "../notifier";
 
 import "@vscode/codicons/dist/codicon.css";
 import "./index.css";
@@ -10,6 +9,7 @@ export enum ToolButton {
   Selection = "Selection",
   Circle = "Circle",
   Rectangle = "Rectangle",
+  Any = "Any",
 }
 
 interface ToolbarOptions {
@@ -34,17 +34,10 @@ export class Toolbar {
   constructor(options: ToolbarOptions) {
     this.onClick = options.onClick;
     this.initDOM();
-    this.bindEvent();
   }
 
   public get node(): HTMLElement {
     return this.oToolbar;
-  }
-
-  private bindEvent(): void {
-    // this.state.addListener(() => {
-    //   this.render();
-    // });
   }
 
   private createIconButton(title: string, icon: string): HTMLElement {
@@ -75,8 +68,9 @@ export class Toolbar {
     const oSelection = this.createToolButton(ToolButton.Selection, "blank");
     const oCircle = this.createToolButton(ToolButton.Circle, "circle");
     const oRectangle = this.createToolButton(ToolButton.Rectangle, "primitive-square");
+    const oAny = this.createToolButton(ToolButton.Any, "edit");
 
-    return [oBackward, oForward, oSelection, oCircle, oRectangle];
+    return [oBackward, oForward, oSelection, oCircle, oRectangle, oAny];
   }
 
   private clean() {

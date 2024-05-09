@@ -4,6 +4,7 @@ import {
   SelectionEventStateMachine,
   CircleEventStateMachine,
   RectangleEventStateMachine,
+  AnyEventStateMachine,
   ToolButton,
   GraphController,
   HistoryController,
@@ -17,12 +18,14 @@ const ToolButtonToDrawState = {
   [ToolButton.Selection]: SelectionEventStateMachine,
   [ToolButton.Circle]: CircleEventStateMachine,
   [ToolButton.Rectangle]: RectangleEventStateMachine,
+  [ToolButton.Any]: AnyEventStateMachine,
 };
 
 const DrawStateToToolButton = {
   [SelectionEventStateMachine.name]: ToolButton.Selection,
   [CircleEventStateMachine.name]: ToolButton.Circle,
   [RectangleEventStateMachine.name]: ToolButton.Rectangle,
+  [AnyEventStateMachine.name]: ToolButton.Any,
 };
 
 class ApplicationState {
@@ -84,6 +87,7 @@ export class Application {
           } else {
             this.toolbar.seletedToolButton = ToolButton.Selection;
             this.statusbar.stateText = ToolButton.Selection;
+            this.drawState = new SelectionEventStateMachine(this);
           }
           this.render();
         },
