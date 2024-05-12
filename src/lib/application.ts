@@ -9,10 +9,12 @@ import {
   GraphController,
   HistoryController,
   InteractiveCanvas,
-  Matrix,
   Statusbar,
   Propertybar,
+  Circle,
 } from ".";
+
+import "./style/global.css";
 
 const ToolButtonToDrawState = {
   [ToolButton.Selection]: SelectionEventStateMachine,
@@ -59,8 +61,8 @@ export class Application {
       width: window.innerWidth,
       height: window.innerHeight,
       event: {
-        onMatrixChange: (matrix: Matrix) => {
-          this.render();
+        onMatrixChange: () => {
+          this.drawGraphs();
         },
         onKeydown: (e: KeyboardEvent) => {
           this.drawState.onKeydown(e);
@@ -73,8 +75,7 @@ export class Application {
         },
         onMousemove: (e: MouseEvent) => {
           this.drawState.onMousemove(e);
-          this.statusbar.mousePosition = this.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-          this.render();
+          this.statusbar.update({ position: this.interactiveCanvas.toGlobal([e.clientX, e.clientY]) });
         },
         onMouseup: (e: MouseEvent) => {
           this.drawState.onMouseup(e);
@@ -85,11 +86,10 @@ export class Application {
           if (!toolButton) {
             this.drawState.onEscape();
           } else {
-            this.toolbar.seletedToolButton = ToolButton.Selection;
-            this.statusbar.stateText = ToolButton.Selection;
+            this.toolbar.update(ToolButton.Selection);
+            this.statusbar.update({ stateText: ToolButton.Selection });
             this.drawState = new SelectionEventStateMachine(this);
           }
-          this.render();
         },
       },
     });
@@ -112,29 +112,44 @@ export class Application {
         }
 
         if (this.toolbar.seletedToolButton === button) return;
-        this.toolbar.seletedToolButton = button;
+        this.toolbar.update(button);
+
         const DrawState = ToolButtonToDrawState[button];
         if (DrawState) {
           this.drawState = new DrawState(this);
-          this.statusbar.stateText = button;
+          this.statusbar.update({ stateText: button });
         }
-        this.render();
       },
     });
 
     this.statusbar = new Statusbar();
-    this.statusbar.stateText = ToolButton.Selection;
 
-    this.propertybar = new Propertybar();
+    this.propertybar = new Propertybar({
+      onChangedGraph: graph => {
+        this.graphController.updateGraph(graph.id, graph);
+        this.propertybar.graph = graph;
+      },
+    });
+
+    // this.propertybar.graph = new Circle({ id: "circle", center: [100, 100], radius: 50 });
 
     this.graphController.addListener(() => {
-      this.render();
+      const selectedGraph = this.graphController.selectedGraphs[0];
+      if (this.propertybar.graph?.id !== selectedGraph?.id) {
+        this.propertybar.graph = selectedGraph;
+      }
+
+      this.drawGraphs();
     });
 
     this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertybar.node);
   }
 
-  private drawGraphs(ctx: CanvasRenderingContext2D, graphs: Graph[]): void {
+  private drawGraphs(): void {
+    this.interactiveCanvas.update();
+    const ctx = this.interactiveCanvas.ctx;
+    const graphs = this.graphController.graphs;
+
     for (const graph of graphs) {
       graph.paint(ctx);
       if (graph.selected) graph.towingPointPaint(ctx);
@@ -142,10 +157,9 @@ export class Application {
   }
 
   public render(): void {
-    this.interactiveCanvas.render();
-    this.drawGraphs(this.interactiveCanvas.ctx, this.graphController.graphs);
-    this.toolbar.render();
-    this.statusbar.render();
+    this.drawGraphs();
+    this.toolbar.render(ToolButton.Selection);
+    this.statusbar.render([0, 0], "");
   }
 
   public saveState() {
