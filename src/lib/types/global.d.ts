@@ -10,3 +10,13 @@ declare type ValueFunction<T> = (value: T) => void;
 declare interface Cloneable<T> {
   copyWith(options: T): unknown;
 }
+
+declare interface Equatable<T> {
+  equals(other: T): boolean;
+}
+
+declare interface Component {
+  clean(): void;
+  update(...args: unknown[]): void;
+  render(): void;
+}
