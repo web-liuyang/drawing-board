@@ -1,89 +1,32 @@
-import { iconName } from "../icon";
+import type { ToolButton, ToolbarComponentOptions } from "./toolbar-component";
+import { ToolbarComponent } from "./toolbar-component";
 
 import "@vscode/codicons/dist/codicon.css";
 import "./index.css";
 
-export enum ToolButton {
-  Backward = "Backward",
-  Forward = "Forward",
-  Selection = "Selection",
-  Circle = "Circle",
-  Rectangle = "Rectangle",
-  Any = "Any",
-}
-
-interface ToolbarOptions {
-  onClick: (button: ToolButton) => void;
-}
+interface ToolbarOptions extends ToolbarComponentOptions {}
 
 export class Toolbar {
-  private onClick: ToolbarOptions["onClick"];
-
-  private _seletedToolButton: ToolButton = ToolButton.Selection;
+  private component: ToolbarComponent;
 
   public get seletedToolButton(): ToolButton {
-    return this._seletedToolButton;
+    return this.component.seletedToolButton;
   }
-
-  public set seletedToolButton(button: ToolButton) {
-    this._seletedToolButton = button;
-  }
-
-  private oToolbar!: HTMLElement;
 
   constructor(options: ToolbarOptions) {
-    this.onClick = options.onClick;
-    this.initDOM();
+    this.component = new ToolbarComponent(options);
   }
 
   public get node(): HTMLElement {
-    return this.oToolbar;
+    return this.component.node;
   }
 
-  private createIconButton(title: string, icon: string): HTMLElement {
-    const oButton = document.createElement("button");
-    oButton.className = "toolbar__button " + iconName(icon);
-    oButton.title = title;
-    return oButton;
+  public update(seletedToolButton: ToolButton): void {
+    this.component.update(seletedToolButton);
   }
 
-  private initDOM(): void {
-    this.oToolbar = document.createElement("div");
-    this.oToolbar.className = "toolbar";
-  }
-
-  private createToolButton(button: ToolButton, icon: string): HTMLElement {
-    const oButton = this.createIconButton(button, icon);
-    const onclick = () => this.onClick(button);
-    if (this.seletedToolButton === button) oButton.className += " selected";
-    oButton.title = button;
-    oButton.addEventListener("click", onclick, false);
-
-    return oButton;
-  }
-
-  private createToolButtons(): HTMLElement[] {
-    const oBackward = this.createToolButton(ToolButton.Backward, "debug-step-back");
-    const oForward = this.createToolButton(ToolButton.Forward, "debug-step-over");
-    const oSelection = this.createToolButton(ToolButton.Selection, "blank");
-    const oCircle = this.createToolButton(ToolButton.Circle, "circle");
-    const oRectangle = this.createToolButton(ToolButton.Rectangle, "primitive-square");
-    const oAny = this.createToolButton(ToolButton.Any, "edit");
-
-    return [oBackward, oForward, oSelection, oCircle, oRectangle, oAny];
-  }
-
-  private clean() {
-    const oToolbar = this.oToolbar;
-    for (let i = 0, len = oToolbar.childElementCount; i < len; i++) {
-      const node = oToolbar.firstElementChild;
-      node!.remove();
-    }
-  }
-
-  public render(): void {
-    this.clean();
-    const oToolButtons = this.createToolButtons();
-    this.oToolbar.append(...oToolButtons);
+  public render(seletedToolButton: ToolButton): void {
+    this.component.seletedToolButton = seletedToolButton;
+    this.component.render();
   }
 }
