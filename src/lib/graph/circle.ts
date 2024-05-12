@@ -8,6 +8,8 @@ export interface CircleOptions extends GraphOptions {
 }
 
 export class Circle extends Graph<CircleOptions> {
+  public override readonly type = "Circle";
+
   public readonly radius: number;
 
   public readonly center: Point;
@@ -25,6 +27,7 @@ export class Circle extends Graph<CircleOptions> {
     this.draw(ctx, () => {
       path.arc(x, y, radius, 0, 2 * Math.PI);
       ctx.stroke(path);
+      ctx.fill(path);
     });
   }
 
@@ -98,5 +101,14 @@ export class Circle extends Graph<CircleOptions> {
     leftBottom.paint(ctx);
     rightTop.paint(ctx);
     rightBottom.paint(ctx);
+  }
+
+  public override equals(other: Circle): boolean {
+    return (
+      super.equals(other) &&
+      this.center[0] === other.center[0] &&
+      this.center[1] === other.center[1] &&
+      this.radius === other.radius
+    );
   }
 }

@@ -20,6 +20,8 @@ export interface RectangleFromCenterOptions extends GraphOptions {
 }
 
 export class Rectangle extends Graph<RectangleOptions> {
+  public override readonly type = "Rectangle";
+
   static fromCenter(options: RectangleFromCenterOptions): Rectangle {
     const [x1, y1] = [options.x - options.width / 2, options.y - options.height / 2];
     const [x2, y2] = [options.x + options.width / 2, options.y + options.height / 2];
@@ -69,6 +71,7 @@ export class Rectangle extends Graph<RectangleOptions> {
     this.draw(ctx, () => {
       path.rect(x, y, w, h);
       ctx.stroke(path);
+      ctx.fill(path);
     });
   }
 
@@ -135,5 +138,15 @@ export class Rectangle extends Graph<RectangleOptions> {
     leftBottom.paint(ctx);
     rightTop.paint(ctx);
     rightBottom.paint(ctx);
+  }
+
+  public override equals(other: Rectangle): boolean {
+    return (
+      super.equals(other) &&
+      this.x1 === other.x1 &&
+      this.y1 === other.y1 &&
+      this.x2 === other.x2 &&
+      this.y2 === other.y2
+    );
   }
 }

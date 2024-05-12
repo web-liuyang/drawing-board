@@ -1,22 +1,22 @@
 import { Fill } from "./fill";
-import { Stroke } from "./stroke";
+import { Stroke, StrokeCap, StrokeJoin } from "./stroke";
 
 interface StyleOptions {
   stroke: Stroke;
   fill: Fill;
 }
 
-export class Style implements Cloneable<StyleOptions> {
+export class Style implements Cloneable<StyleOptions>, Equatable<Style> {
   static default() {
     return new Style({
       stroke: new Stroke({
         color: "#000",
         width: 1,
-        cap: "butt",
-        join: "miter",
+        cap: StrokeCap.butt,
+        join: StrokeJoin.miter,
       }),
       fill: new Fill({
-        color: "#fff",
+        color: "transparent",
       }),
     });
   }
@@ -35,5 +35,9 @@ export class Style implements Cloneable<StyleOptions> {
       stroke: options.stroke ?? this.stroke,
       fill: options.fill ?? this.fill,
     });
+  }
+
+  public equals(other: Style): boolean {
+    return this.stroke.equals(other.stroke) && this.fill.equals(other.fill);
   }
 }

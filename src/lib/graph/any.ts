@@ -7,6 +7,8 @@ export interface AnyOptions extends GraphOptions {
 }
 
 export class Any extends Graph<AnyOptions> {
+  public override readonly type = "Any";
+
   public readonly points: AnyOptions["points"];
 
   constructor(options: AnyOptions) {
@@ -110,5 +112,13 @@ export class Any extends Graph<AnyOptions> {
     leftBottom.paint(ctx);
     rightTop.paint(ctx);
     rightBottom.paint(ctx);
+  }
+
+  public override equals(other: Any): boolean {
+    return (
+      super.equals(other) &&
+      this.points.length === other.points.length &&
+      this.points.every((point, index) => point[0] === other.points[index][0] && point[1] === other.points[index][1])
+    );
   }
 }
