@@ -1,9 +1,4 @@
-import type { ChangeCallback } from "../notifier/notifier";
-import type { GraphController } from "../graph/graph-controller";
 import { Matrix } from "../matrix";
-import { ChangeNotifier, ValueNotifier } from "../notifier";
-import { CanvasEventStateMachine, SelectionEventStateMachine } from "../canvas-event-state-machine";
-import { GraphId } from "../graph";
 import { absoluteError } from "../math";
 
 /**
@@ -11,7 +6,7 @@ import { absoluteError } from "../math";
  */
 type Viewbox = [number, number, number, number];
 
-interface CanvasEvent {
+interface InteractiveCanvasEvent {
   onMatrixChange: ValueFunction<Matrix>;
 
   onKeydown: ValueFunction<KeyboardEvent>;
@@ -23,20 +18,16 @@ interface CanvasEvent {
   onEscape: VoidFunction;
 }
 
-export interface CanvasOptions {
+export interface InteractiveCanvasComponentOptions {
   width: number;
   height: number;
-  event: CanvasEvent;
+  event: InteractiveCanvasEvent;
 }
 
-export class InteractiveCanvas {
+export class InteractiveCanvasComponent implements Component {
   private oCanvas: HTMLCanvasElement;
 
-  private event: CanvasOptions["event"];
-
-  // public readonly drawState: ValueNotifier<CanvasEventStateMachine> = new ValueNotifier<CanvasEventStateMachine>(
-  //   new SelectionEventStateMachine(this),
-  // );
+  private event: InteractiveCanvasComponentOptions["event"];
 
   private _matrix: Matrix = new Matrix([1, 0, 0, 1, 0, 0]);
 
@@ -62,37 +53,21 @@ export class InteractiveCanvas {
 
   public readonly height: number;
 
-  constructor(options: CanvasOptions) {
+  constructor(options: InteractiveCanvasComponentOptions) {
     this.width = options.width;
     this.height = options.height;
     this.event = options.event;
     this._matrix = new Matrix([1, 0, 0, 1, this.width / 2, this.height / 2]);
-    this.oCanvas = this.createCanvas(this.width, this.height);
+    this.oCanvas = createCanvas(this.width, this.height);
 
     this.setLineWidth(this._matrix);
     this.ctx.setTransform(this._matrix);
     this.setViewbox(this._matrix);
 
-    this.bindEvent();
+    this.bindEvent(options.event);
   }
 
-  private createCanvas(w: number, h: number): HTMLCanvasElement {
-    const node = document.createElement("canvas");
-    node.width = w;
-    node.height = h;
-    node.style.width = `${w}`;
-    node.style.height = `${h}`;
-    return node;
-  }
-
-  private bindEvent(): void {
-    // const drawState = this.drawState;
-    const { event } = this;
-    // window.addEventListener("keydown", e => drawState.value.onkeydown(e), false);
-    // this.oCanvas.addEventListener("wheel", e => drawState.value.onwheel(e), false);
-    // this.oCanvas.addEventListener("mousedown", e => drawState.value.onmousedown(e), false);
-    // this.oCanvas.addEventListener("mousemove", e => drawState.value.onmousemove(e), false);
-    // this.oCanvas.addEventListener("mouseup", e => drawState.value.onmouseup(e), false);
+  private bindEvent(event: InteractiveCanvasComponentOptions["event"]): void {
     window.addEventListener(
       "keydown",
       e => {
@@ -125,21 +100,8 @@ export class InteractiveCanvas {
     this._viewbox = [-matrix.e / matrix.a, -matrix.f / matrix.d, width / matrix.a, height / matrix.d];
   }
 
-  public toGlobal(point: Point): Point {
-    const [startX, startY] = this._viewbox;
-    const { a, d } = this._matrix;
-    const [x, y] = point;
-
-    return [startX + x / a, startY + y / d];
-  }
-
-  public clean(): void {
-    const ctx = this.ctx;
-    ctx.clearRect(...this._viewbox);
-  }
-
-  public background(ctx: CanvasRenderingContext2D): void {
-    const [x, y, w, h] = this.viewbox;
+  private background(ctx: CanvasRenderingContext2D, viewbox: Viewbox): void {
+    const [x, y, w, h] = viewbox;
     const gap = 20;
     const xLen = Math.ceil(absoluteError(x, x + w) / gap) + 1;
     const yLen = Math.ceil(absoluteError(y, y + h) / gap) + 1;
@@ -163,8 +125,26 @@ export class InteractiveCanvas {
     ctx.strokeStyle = strokeStyle;
   }
 
+  public clean(): void {
+    const ctx = this.ctx;
+    ctx.clearRect(...this._viewbox);
+  }
+
+  public update(): void {
+    this.render();
+  }
+
   public render() {
     this.clean();
-    this.background(this.ctx);
+    this.background(this.ctx, this.viewbox);
   }
+}
+
+function createCanvas(w: number, h: number): HTMLCanvasElement {
+  const node = document.createElement("canvas");
+  node.width = w;
+  node.height = h;
+  node.style.width = `${w}`;
+  node.style.height = `${h}`;
+  return node;
 }
