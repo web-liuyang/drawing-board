@@ -2,15 +2,20 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { Circle, GraphId, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
+import { PanEventStateMachine } from "./pan-event-state-machine";
 
 export class CircleEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
-    if (e.button !== MouseEventButton.Primary) return;
-    const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-    const circle = new Circle({ id: generateUUID(), center: origin, radius: 0, editing: true });
+    if (e.button === MouseEventButton.Middle)
+      this.application.drawState = new PanEventStateMachine(this.application, this);
 
-    this.application.graphController.addGraph(circle);
-    this.application.drawState = new CircleMousedownStateMachine(this.application, circle.id);
+    if (e.button === MouseEventButton.Primary) {
+      const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+      const circle = new Circle({ id: generateUUID(), center: origin, radius: 0, editing: true });
+
+      this.application.graphController.addGraph(circle);
+      this.application.drawState = new CircleMousedownStateMachine(this.application, circle.id);
+    }
   }
 }
 

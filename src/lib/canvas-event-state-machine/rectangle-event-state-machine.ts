@@ -2,22 +2,27 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { GraphId, Rectangle, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
+import { PanEventStateMachine } from "./pan-event-state-machine";
 
 export class RectangleEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
-    if (e.button !== MouseEventButton.Primary) return;
-    const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-    const rectangle = new Rectangle({
-      id: generateUUID(),
-      x1: x,
-      y1: y,
-      x2: x,
-      y2: y,
-      editing: true,
-    });
+    if (e.button === MouseEventButton.Middle)
+      this.application.drawState = new PanEventStateMachine(this.application, this);
 
-    this.application.graphController.addGraph(rectangle);
-    this.application.drawState = new RectangleMousedownStateMachine(this.application, rectangle.id);
+    if (e.button === MouseEventButton.Primary) {
+      const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+      const rectangle = new Rectangle({
+        id: generateUUID(),
+        x1: x,
+        y1: y,
+        x2: x,
+        y2: y,
+        editing: true,
+      });
+
+      this.application.graphController.addGraph(rectangle);
+      this.application.drawState = new RectangleMousedownStateMachine(this.application, rectangle.id);
+    }
   }
 }
 
