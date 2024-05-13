@@ -23,8 +23,10 @@ export class Any extends Graph<AnyOptions> {
       for (const vertex of this.points) {
         const [x, y] = vertex;
         path.lineTo(x, y);
-        ctx.stroke(path);
       }
+
+      ctx.stroke(path);
+      ctx.fill(path);
     });
   }
 
