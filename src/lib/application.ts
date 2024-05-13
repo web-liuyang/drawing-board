@@ -159,7 +159,7 @@ export class Application {
   public render(): void {
     this.drawGraphs();
     this.toolbar.render(ToolButton.Selection);
-    this.statusbar.render([0, 0], "");
+    this.statusbar.render([0, 0], ToolButton.Selection);
   }
 
   public saveState() {

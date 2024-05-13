@@ -15,8 +15,7 @@ export class Statusbar {
   }
 
   public render(position: Point, stateText: string): void {
-    this.component.position = position;
-    this.component.stateText = stateText;
+    this.component.update(position, stateText);
     this.component.render();
   }
 }
