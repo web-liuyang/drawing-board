@@ -49,16 +49,16 @@ export class InteractiveCanvasComponent implements Component {
     return this.oCanvas.getContext("2d")!;
   }
 
-  public readonly width: number;
+  private _width: number;
 
-  public readonly height: number;
+  public _height: number;
 
   constructor(options: InteractiveCanvasComponentOptions) {
-    this.width = options.width;
-    this.height = options.height;
+    this._width = options.width;
+    this._height = options.height;
     this.event = options.event;
-    this._matrix = new Matrix([1, 0, 0, 1, this.width / 2, this.height / 2]);
-    this.oCanvas = createCanvas(this.width, this.height);
+    this._matrix = new Matrix([1, 0, 0, 1, this._width / 2, this._height / 2]);
+    this.oCanvas = createCanvas(this._width, this._height);
 
     this.setLineWidth(this._matrix);
     this.ctx.setTransform(this._matrix);
@@ -96,8 +96,8 @@ export class InteractiveCanvasComponent implements Component {
   }
 
   private setViewbox(matrix: Matrix): void {
-    const { width, height } = this;
-    this._viewbox = [-matrix.e / matrix.a, -matrix.f / matrix.d, width / matrix.a, height / matrix.d];
+    const { _width, _height } = this;
+    this._viewbox = [-matrix.e / matrix.a, -matrix.f / matrix.d, _width / matrix.a, _height / matrix.d];
   }
 
   private background(ctx: CanvasRenderingContext2D, viewbox: Viewbox): void {
@@ -130,6 +130,18 @@ export class InteractiveCanvasComponent implements Component {
     ctx.clearRect(...this._viewbox);
   }
 
+  public resize(width: number, height: number): void {
+    setCanvasStyle(this.oCanvas, width, height);
+    this._width = width;
+    this._height = height;
+
+    this.ctx.setTransform(this._matrix);
+    this.setLineWidth(this._matrix);
+    this.setViewbox(this._matrix);
+
+    this.render();
+  }
+
   public update(): void {
     this.render();
   }
@@ -142,9 +154,13 @@ export class InteractiveCanvasComponent implements Component {
 
 function createCanvas(w: number, h: number): HTMLCanvasElement {
   const node = document.createElement("canvas");
+  setCanvasStyle(node, w, h);
+  return node;
+}
+
+function setCanvasStyle(node: HTMLCanvasElement, w: number, h: number): void {
   node.width = w;
   node.height = h;
   node.style.width = `${w}`;
   node.style.height = `${h}`;
-  return node;
 }

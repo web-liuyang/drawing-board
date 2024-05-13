@@ -35,6 +35,10 @@ export class InteractiveCanvas {
     return [startX + x / a, startY + y / d];
   }
 
+  public resize(width: number, height: number): void {
+    this.component.resize(width, height);
+  }
+
   public update(): void {
     this.component.update();
   }

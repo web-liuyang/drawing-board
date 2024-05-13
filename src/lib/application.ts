@@ -11,7 +11,6 @@ import {
   InteractiveCanvas,
   Statusbar,
   PropertyPanel,
-  Circle,
 } from ".";
 
 import "./style/global.css";
@@ -34,14 +33,24 @@ class ApplicationState {
   graphs: Graph[] = [];
 }
 
+interface ApplicationOptions {
+  container: HTMLElement;
+  width: number;
+  height: number;
+}
+
 export class Application {
+  private readonly container: HTMLElement;
+
+  private width: number;
+
+  private height: number;
+
   public readonly toolbar: Toolbar;
 
   public readonly statusbar: Statusbar;
 
   public readonly propertyPanel: PropertyPanel;
-
-  private readonly container: HTMLElement;
 
   public readonly interactiveCanvas: InteractiveCanvas;
 
@@ -53,13 +62,15 @@ export class Application {
 
   public drawState: CanvasEventStateMachine = new SelectionEventStateMachine(this);
 
-  constructor(container: HTMLElement) {
-    this.container = container;
+  constructor(options: ApplicationOptions) {
+    this.container = options.container;
+    this.width = options.width;
+    this.height = options.height;
 
     // Canvas
     this.interactiveCanvas = new InteractiveCanvas({
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: this.width,
+      height: this.height,
       event: {
         onMatrixChange: () => {
           this.drawGraphs();
@@ -122,8 +133,10 @@ export class Application {
       },
     });
 
+    // Statusbar
     this.statusbar = new Statusbar();
 
+    // propertyPanel
     this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
         this.graphController.updateGraph(graph.id, graph);
@@ -131,8 +144,7 @@ export class Application {
       },
     });
 
-    // this.propertybar.graph = new Circle({ id: "circle", center: [100, 100], radius: 50 });
-
+    // GraphController
     this.graphController.addListener(() => {
       const selectedGraph = this.graphController.selectedGraphs[0];
       if (this.propertyPanel.graph?.id !== selectedGraph?.id) {
@@ -143,6 +155,13 @@ export class Application {
     });
 
     this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertyPanel.node);
+  }
+
+  public resize(width: number, height: number): void {
+    this.width = width;
+    this.height = height;
+    this.interactiveCanvas.resize(width, height);
+    this.drawGraphs();
   }
 
   private drawGraphs(): void {
