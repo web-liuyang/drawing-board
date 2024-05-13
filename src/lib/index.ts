@@ -6,4 +6,4 @@ export * from "./application";
 export * from "./interactive-canvas";
 export * from "./matrix";
 export * from "./statusbar";
-export * from "./propertybar";
+export * from "./property-panel";

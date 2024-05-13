@@ -10,7 +10,7 @@ import {
   HistoryController,
   InteractiveCanvas,
   Statusbar,
-  Propertybar,
+  PropertyPanel,
   Circle,
 } from ".";
 
@@ -39,7 +39,7 @@ export class Application {
 
   public readonly statusbar: Statusbar;
 
-  public readonly propertybar: Propertybar;
+  public readonly propertyPanel: PropertyPanel;
 
   private readonly container: HTMLElement;
 
@@ -124,10 +124,10 @@ export class Application {
 
     this.statusbar = new Statusbar();
 
-    this.propertybar = new Propertybar({
+    this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
         this.graphController.updateGraph(graph.id, graph);
-        this.propertybar.graph = graph;
+        this.propertyPanel.graph = graph;
       },
     });
 
@@ -135,14 +135,14 @@ export class Application {
 
     this.graphController.addListener(() => {
       const selectedGraph = this.graphController.selectedGraphs[0];
-      if (this.propertybar.graph?.id !== selectedGraph?.id) {
-        this.propertybar.graph = selectedGraph;
+      if (this.propertyPanel.graph?.id !== selectedGraph?.id) {
+        this.propertyPanel.graph = selectedGraph;
       }
 
       this.drawGraphs();
     });
 
-    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertybar.node);
+    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertyPanel.node);
   }
 
   private drawGraphs(): void {

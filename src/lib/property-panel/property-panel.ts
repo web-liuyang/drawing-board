@@ -4,17 +4,17 @@ import { formValuesToGraph, graphToFormGroups } from "./utils";
 
 import "./index.css";
 
-export interface PropertybarOptions {
+export interface PropertyPanelOptions {
   onChangedGraph: (graph: Graph) => void;
 }
 
-export class Propertybar {
-  private oPropertybar: HTMLElement;
+export class PropertyPanel {
+  private oPropertyPanel: HTMLElement;
 
   private dynamicForm: DynamicForm;
 
   get node(): HTMLElement {
-    return this.oPropertybar;
+    return this.oPropertyPanel;
   }
 
   private _graph: Graph | undefined;
@@ -41,9 +41,9 @@ export class Propertybar {
     this._graph = newGraph;
   }
 
-  constructor(options: PropertybarOptions) {
-    this.oPropertybar = document.createElement("div");
-    this.oPropertybar.className = "propertybar";
+  constructor(options: PropertyPanelOptions) {
+    this.oPropertyPanel = document.createElement("div");
+    this.oPropertyPanel.className = "property-panel";
     this.dynamicForm = new DynamicForm({
       onChanged: () => {
         if (!this.graph) return;
@@ -57,6 +57,6 @@ export class Propertybar {
       },
     });
 
-    this.oPropertybar.append(this.dynamicForm.node);
+    this.oPropertyPanel.append(this.dynamicForm.node);
   }
 }
