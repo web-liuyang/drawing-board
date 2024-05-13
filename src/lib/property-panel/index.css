@@ -3,6 +3,9 @@
   right: 12px;
   top: 72px;
   background-color: #eee;
-  padding: 12px 12px;
   border-radius: var(--control-radius);
+}
+
+.property-panel:not(:empty) {
+  padding: 12px 12px;
 }

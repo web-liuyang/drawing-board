@@ -127,7 +127,7 @@ export class Application {
     this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
         this.graphController.updateGraph(graph.id, graph);
-        this.propertyPanel.graph = graph;
+        this.propertyPanel.update(graph);
       },
     });
 
@@ -136,7 +136,7 @@ export class Application {
     this.graphController.addListener(() => {
       const selectedGraph = this.graphController.selectedGraphs[0];
       if (this.propertyPanel.graph?.id !== selectedGraph?.id) {
-        this.propertyPanel.graph = selectedGraph;
+        this.propertyPanel.update(selectedGraph);
       }
 
       this.drawGraphs();

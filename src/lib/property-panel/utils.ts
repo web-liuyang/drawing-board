@@ -46,12 +46,6 @@ function circleGeneralFormGroup(circle: Circle): FormGroup {
     formItems: [
       {
         componentType: "input",
-        label: "Radius",
-        name: "radius",
-        value: circle.radius.toString(),
-      },
-      {
-        componentType: "input",
         label: "X",
         name: "x",
         value: circle.center[0].toString(),
@@ -61,6 +55,12 @@ function circleGeneralFormGroup(circle: Circle): FormGroup {
         label: "Y",
         name: "y",
         value: circle.center[1].toString(),
+      },
+      {
+        componentType: "input",
+        label: "Radius",
+        name: "radius",
+        value: circle.radius.toString(),
       },
     ],
   };
