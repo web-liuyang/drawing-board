@@ -2,20 +2,17 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { Any, GraphId, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
-import { PanEventStateMachine } from "./pan-event-state-machine";
 
 export class AnyEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
-    if (e.button === MouseEventButton.Middle)
-      this.application.drawState = new PanEventStateMachine(this.application, this);
+    super.onMousedown(e);
 
-    if (e.button === MouseEventButton.Primary) {
-      const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-      const any = new Any({ id: generateUUID(), points: [origin], editing: true });
+    if (e.button !== MouseEventButton.Primary) return;
+    const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const any = new Any({ id: generateUUID(), points: [origin], editing: true });
 
-      this.application.graphController.addGraph(any);
-      this.application.drawState = new AnyMousedownStateMachine(this.application, any.id);
-    }
+    this.application.graphController.addGraph(any);
+    this.application.drawState = new AnyMousedownStateMachine(this.application, any.id);
   }
 }
 
@@ -28,6 +25,8 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onMousedown(e: MouseEvent): void {
+    super.onMousedown(e);
+
     if (e.button !== MouseEventButton.Primary) return;
     const any = this.application.graphController.findGraph<Any>(this.id)!;
 
@@ -37,6 +36,8 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onMousemove(e: MouseEvent): void {
+    super.onMousemove(e);
+
     const any = this.application.graphController.findGraph<Any>(this.id)!;
     const position = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
 
@@ -44,6 +45,8 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onEscape(): void {
+    super.onEscape();
+
     const any: Any = this.application.graphController.findGraph<Any>(this.id)!;
     this.application.graphController.removeGraph(any.id);
     this.application.drawState = new AnyEventStateMachine(this.application);

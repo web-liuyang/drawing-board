@@ -2,27 +2,24 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { GraphId, Rectangle, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
-import { PanEventStateMachine } from "./pan-event-state-machine";
 
 export class RectangleEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
-    if (e.button === MouseEventButton.Middle)
-      this.application.drawState = new PanEventStateMachine(this.application, this);
+    super.onMousedown(e);
 
-    if (e.button === MouseEventButton.Primary) {
-      const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-      const rectangle = new Rectangle({
-        id: generateUUID(),
-        x1: x,
-        y1: y,
-        x2: x,
-        y2: y,
-        editing: true,
-      });
+    if (e.button !== MouseEventButton.Primary) return;
+    const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const rectangle = new Rectangle({
+      id: generateUUID(),
+      x1: x,
+      y1: y,
+      x2: x,
+      y2: y,
+      editing: true,
+    });
 
-      this.application.graphController.addGraph(rectangle);
-      this.application.drawState = new RectangleMousedownStateMachine(this.application, rectangle.id);
-    }
+    this.application.graphController.addGraph(rectangle);
+    this.application.drawState = new RectangleMousedownStateMachine(this.application, rectangle.id);
   }
 }
 
@@ -38,6 +35,8 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onMousedown(e: MouseEvent): void {
+    super.onMousedown(e);
+
     if (e.button !== MouseEventButton.Primary) return;
     const rectangle = this.application.graphController.findGraph<Rectangle>(this.id)!;
     this.application.graphController.updateGraph(rectangle.id, rectangle.copyWith({ editing: false }));
@@ -46,6 +45,8 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onMousemove(e: MouseEvent): void {
+    super.onMousemove(e);
+
     const rectangle = this.rectangle;
     const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
     const { x1, y1, x2, y2 } = rectangle;
@@ -71,6 +72,8 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
   }
 
   override onEscape(): void {
+    super.onEscape();
+
     const rectangle = this.application.graphController.findGraph<Rectangle>(this.id)!;
     this.application.graphController.removeGraph(rectangle.id);
     this.application.drawState = new RectangleEventStateMachine(this.application);
