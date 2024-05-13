@@ -1,6 +1,6 @@
 import type { Graph } from "../graph";
 import { DynamicForm } from "../dynamic-form";
-import { formValuesToGraph, graphToFormGroups } from "./utils";
+import { formValuesToGraph, graphToFormGroups } from "./transfer-utils";
 import { removeElementChild } from "../utils/element-utils";
 
 export interface PropertyPanelComponentOptions {
