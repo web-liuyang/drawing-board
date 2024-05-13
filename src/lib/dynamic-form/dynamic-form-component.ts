@@ -45,41 +45,27 @@ export interface DynamicFormComponentOptions {
   onChanged: () => void;
 }
 
-export class DynamicFormComponent {
+export class DynamicFormComponent implements Component {
   private oForm: HTMLFormElement;
-
-  private formGroups: FormGroup[] = [];
 
   public get node() {
     return this.oForm;
+  }
+
+  public _formGroups: FormGroup[] = [];
+
+  public get formGroups(): FormGroup[] {
+    return this._formGroups;
+  }
+
+  public set formGroups(formGroups: FormGroup[]) {
+    this._formGroups = formGroups;
   }
 
   constructor(options: DynamicFormComponentOptions) {
     this.oForm = document.createElement("form");
     this.oForm.className = "dynamic-form";
     this.oForm.addEventListener("input", () => options.onChanged());
-  }
-
-  public setFormGroups(formGroups: FormGroup[]): void {
-    this.formGroups = formGroups;
-  }
-
-  public update(formGroups: FormGroup[]): void {
-    if (this.formGroups === formGroups) return;
-    const elements = this.oForm.elements;
-    const diffs = diffValue(getformItems(formGroups), getformItems(this.formGroups));
-
-    for (const formItem of diffs) {
-      const oElement = elements.namedItem(formItem.name) as ComponentNodeTypeUpdatable | undefined;
-      if (!oElement) continue;
-      oElement.value = formItem.value;
-    }
-
-    this.setFormGroups(formGroups);
-  }
-
-  private clean(): void {
-    removeElementChild(this.oForm);
   }
 
   private createFormGroup(fromGroup: FormGroup): HTMLElement {
@@ -123,28 +109,33 @@ export class DynamicFormComponent {
     oLabel.textContent = formItem.label ?? "";
     oDisplay.append(oLabel);
 
-    const oComp = this.createComp(formItem);
+    const oComp = createComp(formItem);
     oDisplay.append(oComp);
 
     return oDisplay;
   }
 
-  private createComp(formItem: FormItem): HTMLElement {
-    switch (formItem.componentType) {
-      case "input":
-        return createInputComp(formItem);
-      case "select":
-        return createSelectComp(formItem);
-      case "info":
-        return createInfoComp(formItem);
+  public clean(): void {
+    removeElementChild(this.oForm);
+  }
+
+  public update(formGroups: FormGroup[]): void {
+    if (this._formGroups === formGroups) return;
+    const elements = this.oForm.elements;
+    const diffs = diffValue(getformItems(formGroups), getformItems(this._formGroups));
+
+    for (const formItem of diffs) {
+      const oElement = elements.namedItem(formItem.name) as ComponentNodeTypeUpdatable | undefined;
+      if (!oElement) continue;
+      oElement.value = formItem.value;
     }
 
-    // throw new Error("not support component type: " + formItem.componentType);
+    this._formGroups = formGroups;
   }
 
   public render(): void {
     this.clean();
-    for (const group of this.formGroups) {
+    for (const group of this._formGroups) {
       const node = this.createFormGroup(group);
       this.oForm.append(node);
     }
@@ -172,6 +163,19 @@ function getformItems(formGroups: FormGroup[]): FormItem[] {
   }
 
   return formItems;
+}
+
+function createComp(formItem: FormItem): HTMLElement {
+  switch (formItem.componentType) {
+    case "input":
+      return createInputComp(formItem);
+    case "select":
+      return createSelectComp(formItem);
+    case "info":
+      return createInfoComp(formItem);
+  }
+
+  // throw new Error("not support component type: " + formItem.componentType);
 }
 
 function createInputComp(item: InputFormItem): HTMLElement {

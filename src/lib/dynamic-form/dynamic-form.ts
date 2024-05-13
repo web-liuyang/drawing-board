@@ -31,12 +31,16 @@ export class DynamicForm {
     return true;
   }
 
+  public clean() {
+    this.component.clean();
+  }
+
   public update(formGroups: FormGroup[]): void {
     this.component.update(formGroups);
   }
 
   public render(formGroups: FormGroup[]): void {
-    this.component.setFormGroups(formGroups);
+    this.component.formGroups = formGroups;
     this.component.render();
   }
 }
