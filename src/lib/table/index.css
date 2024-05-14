@@ -1,0 +1,10 @@
+.table {
+  position: relative;
+  border-collapse: collapse;
+}
+
+.table .thead {
+  position: sticky;
+  top: 0;
+  background-color: #eee;
+}
