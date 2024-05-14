@@ -60,13 +60,14 @@ export class PropertyPanelComponent implements Component {
   public render(): void {
     this.clean();
     this.dynamicForm = new DynamicForm({
-      onChanged: () => {
+      onChanged: values => {
         if (!this.graph) return;
         if (!this.dynamicForm!.isValid()) return;
-        const values = this.dynamicForm!.getValues();
+        console.log("isValid: ", this.dynamicForm!.isValid());
         const graph = formValuesToGraph(values, this.graph);
         const isEqual = this._graph!.equals(graph);
         if (isEqual) return;
+
         this._graph = graph;
         this.onChangedGraph(graph);
       },

@@ -16,19 +16,8 @@ export class DynamicForm {
     });
   }
 
-  public getValues(): Record<string, string> {
-    const formDataIter = new FormData(this.node).entries();
-
-    const values: Record<string, string> = {};
-    for (const [key, value] of formDataIter) {
-      values[key] = value as string;
-    }
-
-    return values;
-  }
-
   public isValid(): boolean {
-    return true;
+    return this.component.isValid();
   }
 
   public clean() {

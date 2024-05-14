@@ -16,6 +16,7 @@ declare interface Equatable<T> {
 }
 
 declare interface Component {
+  node: HTMLElement;
   clean(): void;
   update(...args: unknown[]): void;
   render(): void;

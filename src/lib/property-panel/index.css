@@ -2,8 +2,10 @@
   position: fixed;
   right: 12px;
   top: 72px;
+  bottom: 72px;
   background-color: #eee;
   border-radius: var(--control-radius);
+  overflow-y: auto;
 }
 
 .property-panel:not(:empty) {

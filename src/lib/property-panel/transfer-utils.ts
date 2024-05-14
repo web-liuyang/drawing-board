@@ -1,4 +1,5 @@
 import type { FormGroup, Option } from "../dynamic-form";
+import type { FormValues } from "../dynamic-form/dynamic-form-component";
 import { Any, Fill, Graph, Rectangle, Stroke, Style } from "../graph";
 import { Circle, StrokeCap, StrokeJoin } from "../graph";
 
@@ -99,10 +100,16 @@ function rectangleGeneralFormGroup(rectangle: Rectangle): FormGroup {
 }
 
 function anyGeneralFormGroup(any: Any): FormGroup {
-  // TODO Point
   return {
     name: "Point",
-    formItems: [],
+    formItems: [
+      {
+        componentType: "point",
+        label: "Point",
+        name: "point",
+        value: any.points,
+      },
+    ],
   };
 }
 
@@ -166,20 +173,20 @@ function styleFormGroup(style: Style): FormGroup {
   };
 }
 
-export function formValuesToGraph(formValues: Record<string, string>, graph: Graph): Graph {
+export function formValuesToGraph(formValues: FormValues, graph: Graph): Graph {
   if (graph instanceof Circle) {
     return graph.copyWith({
       center: [Number(formValues.x), Number(formValues.y)],
       radius: Number(formValues.radius),
       style: new Style({
         stroke: new Stroke({
-          color: formValues.strokeColor,
+          color: formValues.strokeColor as string,
           width: Number(formValues.strokeWidth),
           cap: formValues.strokeCap as StrokeCap,
           join: formValues.strokeJoin as StrokeJoin,
         }),
         fill: new Fill({
-          color: formValues.fillColor,
+          color: formValues.fillColor as string,
         }),
       }),
     });
@@ -193,13 +200,13 @@ export function formValuesToGraph(formValues: Record<string, string>, graph: Gra
       y2: Number(formValues.y) + Number(formValues.height),
       style: new Style({
         stroke: new Stroke({
-          color: formValues.strokeColor,
+          color: formValues.strokeColor as string,
           width: Number(formValues.strokeWidth),
           cap: formValues.strokeCap as StrokeCap,
           join: formValues.strokeJoin as StrokeJoin,
         }),
         fill: new Fill({
-          color: formValues.fillColor,
+          color: formValues.fillColor as string,
         }),
       }),
     });
@@ -207,17 +214,16 @@ export function formValuesToGraph(formValues: Record<string, string>, graph: Gra
 
   if (graph instanceof Any) {
     return graph.copyWith({
-      // points: formValues.vertices.split(",").map(v => [Number(v), Number(v)]),
-      points: graph.points,
+      points: formValues.point as Point[],
       style: new Style({
         stroke: new Stroke({
-          color: formValues.strokeColor,
+          color: formValues.strokeColor as string,
           width: Number(formValues.strokeWidth),
           cap: formValues.strokeCap as StrokeCap,
           join: formValues.strokeJoin as StrokeJoin,
         }),
         fill: new Fill({
-          color: formValues.fillColor,
+          color: formValues.fillColor as string,
         }),
       }),
     });

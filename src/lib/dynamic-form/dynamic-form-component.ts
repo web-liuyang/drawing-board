@@ -1,8 +1,9 @@
 import { removeElementChild } from "../utils/element-utils";
+import { Table } from "../table";
 
 import "./index.css";
 
-type ComponentType = "input" | "select" | "info";
+type ComponentType = "input" | "select" | "info" | "point";
 
 export interface FormGroup {
   name: string;
@@ -15,8 +16,8 @@ interface FormItemBase<T, E = Event> {
   value: T;
   name: string;
   label?: string;
-  onChanged?: (event: E, value: T) => void;
-  onValid?: (event: E, value: T) => string | void;
+  onChanged?: (value: T, event: E) => void;
+  onValid?: (value: T) => string | void;
 }
 
 type ComponentNodeTypeUpdatable = HTMLInputElement | HTMLSelectElement;
@@ -39,17 +40,27 @@ export interface InfoFormItem extends Omit<FormItemBase<string>, "disabled" | "o
   componentType: "info";
 }
 
-export type FormItem = InputFormItem | SelectFormItem | InfoFormItem;
+export interface PointFormItem extends FormItemBase<Point[]> {
+  componentType: "point";
+}
+
+export type FormItem = InputFormItem | SelectFormItem | InfoFormItem | PointFormItem;
 
 export interface DynamicFormComponentOptions {
-  onChanged: () => void;
+  onChanged: (values: FormValues) => void;
 }
+
+export type FormValues = Record<string, string | Point[]>;
 
 export class DynamicFormComponent implements Component {
   private oForm: HTMLFormElement;
 
   public get node() {
     return this.oForm;
+  }
+
+  private get formItemAll(): FormItem[] {
+    return getFormItems(this._formGroups);
   }
 
   public _formGroups: FormGroup[] = [];
@@ -65,7 +76,48 @@ export class DynamicFormComponent implements Component {
   constructor(options: DynamicFormComponentOptions) {
     this.oForm = document.createElement("form");
     this.oForm.className = "dynamic-form";
-    this.oForm.addEventListener("input", () => options.onChanged());
+    this.oForm.addEventListener("input", () => {
+      options.onChanged(this.getValues());
+    });
+  }
+
+  public isValid(): boolean {
+    const values = this.getValues();
+    const formItems = this.formItemAll;
+
+    for (const item of formItems) {
+      if (item.componentType === "info") continue;
+      const value = values[item.name];
+      const errorText = item.onValid ? item.onValid(value as string & Point[]) : undefined;
+      if (errorText) return false;
+    }
+
+    return true;
+  }
+
+  public getValues(): FormValues {
+    const formData = new FormData(this.oForm);
+    const elements = this.oForm.elements;
+    const values: FormValues = {};
+
+    for (const item of this.formItemAll) {
+      if (item.componentType === "info") continue;
+      if (item.componentType === "point") {
+        const points: Point[] = [];
+
+        for (let index = 0, length = item.value.length; index < length; index++) {
+          const [x, y] = formData.getAll(pointElementName(item.name, index));
+          points.push([Number(x), Number(y)]);
+        }
+
+        values[item.name] = points;
+      } else {
+        const element = elements.namedItem(item.name) as ComponentNodeTypeUpdatable;
+        values[item.name] = element.value;
+      }
+    }
+
+    return values;
   }
 
   private createFormGroup(fromGroup: FormGroup): HTMLElement {
@@ -120,17 +172,23 @@ export class DynamicFormComponent implements Component {
   }
 
   public update(formGroups: FormGroup[]): void {
-    if (this._formGroups === formGroups) return;
-    const elements = this.oForm.elements;
-    const diffs = diffValue(getformItems(formGroups), getformItems(this._formGroups));
+    const oldFormGroups = this._formGroups;
+    const newFormGroups = formGroups;
+    if (newFormGroups === oldFormGroups) return;
 
+    this._formGroups = formGroups;
+    const diffs = diffValue(getFormItems(newFormGroups), this.formItemAll);
+    if (diffs.some(formItem => formItem.componentType === "point")) {
+      this.render();
+      return;
+    }
+
+    const elements = this.oForm.elements;
     for (const formItem of diffs) {
       const oElement = elements.namedItem(formItem.name) as ComponentNodeTypeUpdatable | undefined;
       if (!oElement) continue;
-      oElement.value = formItem.value;
+      oElement.value = formItem.value as string;
     }
-
-    this._formGroups = formGroups;
   }
 
   public render(): void {
@@ -156,10 +214,16 @@ function diffValue(newFormItems: FormItem[], oldFormItems: FormItem[]): FormItem
   return diffFormItems;
 }
 
-function getformItems(formGroups: FormGroup[]): FormItem[] {
+function getFormItems(formGroups: FormGroup[], type?: ComponentType): FormItem[] {
   const formItems: FormItem[] = [];
   for (const group of formGroups) {
-    formItems.push(...group.formItems);
+    if (type) {
+      for (const formItem of group.formItems) {
+        formItem.componentType === type && formItems.push(formItem);
+      }
+    } else {
+      formItems.push(...group.formItems);
+    }
   }
 
   return formItems;
@@ -173,6 +237,8 @@ function createComp(formItem: FormItem): HTMLElement {
       return createSelectComp(formItem);
     case "info":
       return createInfoComp(formItem);
+    case "point":
+      return createPointComp(formItem);
   }
 
   // throw new Error("not support component type: " + formItem.componentType);
@@ -197,11 +263,11 @@ function createInputComp(item: InputFormItem): HTMLElement {
     const target = event.target as HTMLInputElement;
 
     if (item.onChanged) {
-      item.onChanged(event, target.value);
+      item.onChanged(target.value, event);
     }
 
     if (item.onValid) {
-      const error = item.onValid(event, target.value);
+      const error = item.onValid(target.value);
       // console.log(error);
     }
   });
@@ -217,11 +283,11 @@ function createSelectComp(item: SelectFormItem): HTMLElement {
   oSelect.addEventListener("input", event => {
     const target = event.target as HTMLSelectElement;
     if (item.onChanged) {
-      item.onChanged(event, target.value);
+      item.onChanged(target.value, event);
     }
 
     if (item.onValid) {
-      const error = item.onValid(event, target.value);
+      const error = item.onValid(target.value);
       console.log(error);
     }
   });
@@ -243,4 +309,54 @@ function createInfoComp(item: InfoFormItem): HTMLElement {
   oInfo.id = item.name;
   oInfo.textContent = item.value;
   return oInfo;
+}
+
+function createPointComp(item: PointFormItem): HTMLElement {
+  const oBox = document.createElement("div");
+  oBox.className = "point-box";
+
+  const table = new Table<Point>({
+    dataSrouce: item.value,
+    columns: [
+      {
+        name: "index",
+        render: (data, index) => {
+          const oIndex = document.createElement("span");
+          oIndex.id = item.name;
+          oIndex.textContent = index.toString();
+          return oIndex;
+        },
+      },
+      {
+        name: "x",
+        render: (data, index) => {
+          const oInput = document.createElement("input");
+          oInput.name = pointElementName(item.name, index);
+          oInput.value = data[0].toString();
+          return oInput;
+        },
+      },
+      {
+        name: "y",
+        render: (data, index) => {
+          const oInput = document.createElement("input");
+          oInput.name = pointElementName(item.name, index);
+          oInput.value = data[1].toString();
+          return oInput;
+        },
+      },
+    ],
+  });
+
+  table.render();
+  const oTable = table.node;
+  oTable.id = item.name;
+
+  oBox.append(oTable);
+
+  return oBox;
+}
+
+function pointElementName(name: string, index: number): string {
+  return `${name}_${index}`;
 }

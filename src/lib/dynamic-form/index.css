@@ -23,3 +23,8 @@
   font-weight: bold;
   margin-bottom: 8px;
 }
+
+.dynamic-form .point-box {
+  height: 200px;
+  overflow-y: auto;
+}
