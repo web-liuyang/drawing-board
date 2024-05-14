@@ -1,3 +1,14 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+input,
+select {
+  border-width: 1px;
+}
+
 :root {
   --focus-color: #275dc5;
 

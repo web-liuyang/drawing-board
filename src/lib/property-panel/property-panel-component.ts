@@ -63,7 +63,6 @@ export class PropertyPanelComponent implements Component {
       onChanged: values => {
         if (!this.graph) return;
         if (!this.dynamicForm!.isValid()) return;
-        console.log("isValid: ", this.dynamicForm!.isValid());
         const graph = formValuesToGraph(values, this.graph);
         const isEqual = this._graph!.equals(graph);
         if (isEqual) return;

@@ -10,19 +10,18 @@ export interface FormGroup {
   formItems: FormItem[];
 }
 
-interface FormItemBase<T, E = Event> {
+interface FormItemBase<T> {
   componentType: ComponentType;
   disabled?: boolean;
   value: T;
   name: string;
   label?: string;
-  onChanged?: (value: T, event: E) => void;
-  onValid?: (value: T) => string | void;
+  onValid?: (value: T) => string | undefined;
 }
 
 type ComponentNodeTypeUpdatable = HTMLInputElement | HTMLSelectElement;
 
-export interface InputFormItem extends FormItemBase<string, InputEvent> {
+export interface InputFormItem extends FormItemBase<string> {
   componentType: "input";
 }
 
@@ -40,11 +39,14 @@ export interface InfoFormItem extends Omit<FormItemBase<string>, "disabled" | "o
   componentType: "info";
 }
 
-export interface PointFormItem extends FormItemBase<Point[]> {
+export interface PointFormItem extends Omit<FormItemBase<Point[]>, "onValid"> {
   componentType: "point";
+  onValid: (value: [string, string][]) => string | undefined;
 }
 
 export type FormItem = InputFormItem | SelectFormItem | InfoFormItem | PointFormItem;
+
+export type EditableFormItem = Exclude<FormItem, InfoFormItem>;
 
 export interface DynamicFormComponentOptions {
   onChanged: (values: FormValues) => void;
@@ -59,9 +61,7 @@ export class DynamicFormComponent implements Component {
     return this.oForm;
   }
 
-  private get formItemAll(): FormItem[] {
-    return getFormItems(this._formGroups);
-  }
+  private _editableFormItemsMap: Map<EditableFormItem["name"], EditableFormItem> = new Map();
 
   public _formGroups: FormGroup[] = [];
 
@@ -70,29 +70,54 @@ export class DynamicFormComponent implements Component {
   }
 
   public set formGroups(formGroups: FormGroup[]) {
+    this._editableFormItemsMap.clear();
+    for (const group of formGroups) {
+      for (const formItem of group.formItems) {
+        if (formItem.componentType === "info") continue;
+        this._editableFormItemsMap.set(formItem.name, formItem);
+      }
+    }
+
     this._formGroups = formGroups;
   }
 
   constructor(options: DynamicFormComponentOptions) {
     this.oForm = document.createElement("form");
     this.oForm.className = "dynamic-form";
-    this.oForm.addEventListener("input", () => {
-      options.onChanged(this.getValues());
+    this.oForm.addEventListener("input", e => {
+      const target = e.target as HTMLElement;
+      const elements = this.oForm.elements;
+      const field = target.dataset.field!;
+      const componentType = target.dataset.componentType as ComponentType;
+      if (componentType === "info") return;
+      const formItem = this._editableFormItemsMap.get(field)!;
+      let value: string | [string, string][];
+      if (componentType === "point") {
+        const point: [string, string][] = [];
+        const formData = new FormData(this.oForm);
+        for (let index = 0, length = formItem.value.length; index < length; index++) {
+          const [x, y] = formData.getAll(pointElementName(field, index));
+          point.push([`${x}`, `${y}`]);
+        }
+        value = point;
+      } else {
+        const element = elements.namedItem(target.dataset.field as string) as ComponentNodeTypeUpdatable;
+        value = element.value;
+      }
+
+      const errorText = formItem.onValid
+        ? formItem.onValid(value as string & [string, string][]) ?? undefined
+        : undefined;
+
+      this.handleValid(formItem, errorText);
+      if (!errorText) options.onChanged(this.getValues());
     });
   }
 
   public isValid(): boolean {
-    const values = this.getValues();
-    const formItems = this.formItemAll;
-
-    for (const item of formItems) {
-      if (item.componentType === "info") continue;
-      const value = values[item.name];
-      const errorText = item.onValid ? item.onValid(value as string & Point[]) : undefined;
-      if (errorText) return false;
-    }
-
-    return true;
+    const oErrorTextCollection = this.oForm.getElementsByClassName("form-item__error-text");
+    if (oErrorTextCollection.length > 0) return true;
+    return false;
   }
 
   public getValues(): FormValues {
@@ -100,8 +125,7 @@ export class DynamicFormComponent implements Component {
     const elements = this.oForm.elements;
     const values: FormValues = {};
 
-    for (const item of this.formItemAll) {
-      if (item.componentType === "info") continue;
+    for (const item of this._editableFormItemsMap.values()) {
       if (item.componentType === "point") {
         const points: Point[] = [];
 
@@ -143,10 +167,13 @@ export class DynamicFormComponent implements Component {
 
   private createFormItem(formItem: FormItem): HTMLElement {
     const oFormItem = document.createElement("div");
-    oFormItem.className = "form-item";
+    oFormItem.className = `form-item form-item-${formItem.name}`;
 
     const oDisplay = this.createFormItemDisplay(formItem);
     oFormItem.append(oDisplay);
+
+    const oErrorText = this.createErrorText();
+    oFormItem.append(oErrorText);
 
     return oFormItem;
   }
@@ -167,6 +194,24 @@ export class DynamicFormComponent implements Component {
     return oDisplay;
   }
 
+  private createErrorText(): HTMLElement {
+    const oErrorText = document.createElement("div");
+    oErrorText.className = "form-item__error-text";
+    return oErrorText;
+  }
+
+  private handleValid(item: FormItem, errorText?: string): void {
+    const oFormItem = document.querySelector(`.form-item.form-item-${item.name}`) as HTMLElement;
+    const oErrorText = oFormItem.querySelector(".form-item__error-text") as HTMLElement;
+    if (errorText) {
+      oFormItem.classList.add("error");
+      oErrorText.textContent = errorText;
+    } else {
+      oFormItem.classList.remove("error");
+      oErrorText.textContent = "";
+    }
+  }
+
   public clean(): void {
     removeElementChild(this.oForm);
   }
@@ -174,10 +219,14 @@ export class DynamicFormComponent implements Component {
   public update(formGroups: FormGroup[]): void {
     const oldFormGroups = this._formGroups;
     const newFormGroups = formGroups;
+
     if (newFormGroups === oldFormGroups) return;
 
-    this._formGroups = formGroups;
-    const diffs = diffValue(getFormItems(newFormGroups), this.formItemAll);
+    this.formGroups = formGroups;
+
+    // TODO
+    // Optimization
+    const diffs = diffValue(getFormItems(newFormGroups), getFormItems(oldFormGroups));
     if (diffs.some(formItem => formItem.componentType === "point")) {
       this.render();
       return;
@@ -249,28 +298,9 @@ function createInputComp(item: InputFormItem): HTMLElement {
   oInput.id = item.name;
   oInput.name = item.name;
   oInput.value = item.value;
+  oInput.dataset.field = item.name;
+  oInput.dataset.componentType = item.componentType;
   if (item.disabled) oInput.disabled = item.disabled;
-
-  let isComposition: boolean = false;
-  oInput.addEventListener("compositionstart", () => (isComposition = true));
-  oInput.addEventListener("compositionend", e => {
-    isComposition = false;
-    oInput.dispatchEvent(new InputEvent("input", e));
-  });
-  oInput.addEventListener("input", e => {
-    if (isComposition) return;
-    const event = e as InputEvent;
-    const target = event.target as HTMLInputElement;
-
-    if (item.onChanged) {
-      item.onChanged(target.value, event);
-    }
-
-    if (item.onValid) {
-      const error = item.onValid(target.value);
-      // console.log(error);
-    }
-  });
 
   return oInput;
 }
@@ -279,18 +309,9 @@ function createSelectComp(item: SelectFormItem): HTMLElement {
   const oSelect = document.createElement("select");
   oSelect.id = item.name;
   oSelect.name = item.name;
+  oSelect.dataset.field = item.name;
+  oSelect.dataset.componentType = item.componentType;
   if (item.disabled) oSelect.disabled = item.disabled;
-  oSelect.addEventListener("input", event => {
-    const target = event.target as HTMLSelectElement;
-    if (item.onChanged) {
-      item.onChanged(target.value, event);
-    }
-
-    if (item.onValid) {
-      const error = item.onValid(target.value);
-      console.log(error);
-    }
-  });
 
   for (const option of item.options) {
     const oOption = document.createElement("option");
@@ -307,7 +328,9 @@ function createSelectComp(item: SelectFormItem): HTMLElement {
 function createInfoComp(item: InfoFormItem): HTMLElement {
   const oInfo = document.createElement("span");
   oInfo.id = item.name;
+  oInfo.dataset.field = item.name;
   oInfo.textContent = item.value;
+  oInfo.dataset.componentType = item.componentType;
   return oInfo;
 }
 
@@ -323,6 +346,8 @@ function createPointComp(item: PointFormItem): HTMLElement {
         render: (data, index) => {
           const oIndex = document.createElement("span");
           oIndex.id = item.name;
+          oIndex.dataset.field = item.name;
+          oIndex.dataset.componentType = item.componentType;
           oIndex.textContent = index.toString();
           return oIndex;
         },
@@ -332,6 +357,8 @@ function createPointComp(item: PointFormItem): HTMLElement {
         render: (data, index) => {
           const oInput = document.createElement("input");
           oInput.name = pointElementName(item.name, index);
+          oInput.dataset.field = item.name;
+          oInput.dataset.componentType = item.componentType;
           oInput.value = data[0].toString();
           return oInput;
         },
@@ -341,6 +368,8 @@ function createPointComp(item: PointFormItem): HTMLElement {
         render: (data, index) => {
           const oInput = document.createElement("input");
           oInput.name = pointElementName(item.name, index);
+          oInput.dataset.field = item.name;
+          oInput.dataset.componentType = item.componentType;
           oInput.value = data[1].toString();
           return oInput;
         },

@@ -12,7 +12,26 @@
 
 .dynamic-form .form-item__display :first-child {
   width: 120px;
-  padding: 0 12px;
+}
+
+.dynamic-form .form-item__display .display__label {
+  text-indent: 1rem;
+}
+
+.dynamic-form .form-item.error .form-item__display input,
+.dynamic-form .form-item.error .form-item__display select {
+  border-color: red;
+}
+
+.dynamic-form .form-item .form-item__error-text {
+  display: none;
+  text-indent: 1rem;
+  color: red;
+  font-size: 14px;
+}
+
+.dynamic-form .form-item.error .form-item__error-text {
+  display: block;
 }
 
 .dynamic-form .form-group-item:not(:last-child) {
