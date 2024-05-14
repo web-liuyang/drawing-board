@@ -136,9 +136,10 @@ export class Application {
     // Statusbar
     this.statusbar = new Statusbar();
 
-    // propertyPanel
+    // PropertyPanel
     this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
+        console.log("onChangedGraph: ", graph);
         this.graphController.updateGraph(graph.id, graph);
         this.propertyPanel.update(graph);
       },
@@ -177,6 +178,7 @@ export class Application {
 
   public render(): void {
     this.drawGraphs();
+    this.propertyPanel.render(this.graphController.selectedGraphs[0]);
     this.toolbar.render(ToolButton.Selection);
     this.statusbar.render([0, 0], ToolButton.Selection);
   }
