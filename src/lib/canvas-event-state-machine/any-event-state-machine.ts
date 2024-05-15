@@ -2,6 +2,7 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { Any, GraphId, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
+import { Log } from "@log";
 
 export class AnyEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
@@ -9,10 +10,12 @@ export class AnyEventStateMachine extends CanvasEventStateMachine {
 
     if (e.button !== MouseEventButton.Primary) return;
     const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-    const any = new Any({ id: generateUUID(), points: [origin], editing: true });
+    const graph = new Any({ id: generateUUID(), points: [origin], editing: true });
 
-    this.application.graphController.addGraph(any);
-    this.application.drawState = new AnyMousedownStateMachine(this.application, any.id);
+    this.application.graphController.addGraph(graph);
+    this.application.drawState = new AnyMousedownStateMachine(this.application, graph.id);
+
+    Log.info(`Draw Start ${graph.type}: ${graph.id}`);
   }
 }
 
@@ -28,11 +31,12 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const any = this.application.graphController.findGraph<Any>(this.id)!;
+    const graph = this.application.graphController.findGraph<Any>(this.id)!;
 
-    this.application.graphController.updateGraph(any.id, any.copyWith({ editing: false }));
+    this.application.graphController.updateGraph(graph.id, graph.copyWith({ editing: false }));
     this.application.saveState();
     this.application.drawState = new AnyEventStateMachine(this.application);
+    Log.info(`Draw Done ${graph.type}: ${graph.id}`);
   }
 
   override onMousemove(e: MouseEvent): void {
@@ -47,8 +51,9 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
   override onEscape(): void {
     super.onEscape();
 
-    const any: Any = this.application.graphController.findGraph<Any>(this.id)!;
-    this.application.graphController.removeGraph(any.id);
+    const graph: Any = this.application.graphController.findGraph<Any>(this.id)!;
+    this.application.graphController.removeGraph(graph.id);
     this.application.drawState = new AnyEventStateMachine(this.application);
+    Log.info(`Draw Cancel ${graph.type}: ${graph.id}`);
   }
 }

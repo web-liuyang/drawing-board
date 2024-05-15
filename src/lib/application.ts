@@ -12,6 +12,8 @@ import {
   Statusbar,
   PropertyPanel,
 } from ".";
+import { ControlPanel } from "./control-panel";
+import { Log } from "@log";
 
 import "./style/global.css";
 
@@ -46,13 +48,15 @@ export class Application {
 
   private height: number;
 
-  public readonly toolbar: Toolbar;
+  public readonly interactiveCanvas: InteractiveCanvas;
 
-  public readonly statusbar: Statusbar;
+  public readonly toolbar: Toolbar;
 
   public readonly propertyPanel: PropertyPanel;
 
-  public readonly interactiveCanvas: InteractiveCanvas;
+  public readonly controlPanel: ControlPanel;
+
+  public readonly statusbar: Statusbar;
 
   public readonly graphController: GraphController = new GraphController();
 
@@ -133,9 +137,6 @@ export class Application {
       },
     });
 
-    // Statusbar
-    this.statusbar = new Statusbar();
-
     // PropertyPanel
     this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
@@ -144,6 +145,14 @@ export class Application {
         this.propertyPanel.update(graph);
       },
     });
+
+    // ControlPanel
+    this.controlPanel = new ControlPanel({
+      consoleController: Log.controller,
+    });
+
+    // Statusbar
+    this.statusbar = new Statusbar();
 
     // GraphController
     this.graphController.addListener(() => {
@@ -155,7 +164,13 @@ export class Application {
       this.drawGraphs();
     });
 
-    this.container.append(this.interactiveCanvas.node, this.toolbar.node, this.statusbar.node, this.propertyPanel.node);
+    this.container.append(
+      this.interactiveCanvas.node,
+      this.toolbar.node,
+      this.propertyPanel.node,
+      this.controlPanel.node,
+      this.statusbar.node,
+    );
   }
 
   public resize(width: number, height: number): void {
@@ -181,6 +196,7 @@ export class Application {
     this.propertyPanel.render(this.graphController.selectedGraphs[0]);
     this.toolbar.render(ToolButton.Selection);
     this.statusbar.render([0, 0], ToolButton.Selection);
+    this.controlPanel.render();
   }
 
   public saveState() {

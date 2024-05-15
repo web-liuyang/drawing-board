@@ -16,11 +16,8 @@
 .toolbar .toolbar__button.selected {
   border: var(--focus-color) 2px solid;
   border-radius: var(--control-radius);
-  /* background-color: var(--focus-color); */
 }
 
 .toolbar .toolbar__button:focus:not(.selected) {
   outline: none;
 }
-
-/* outline: -webkit-focus-ring-color auto 1px; */

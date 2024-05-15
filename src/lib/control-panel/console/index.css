@@ -1,0 +1,23 @@
+.console {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+
+  font-size: var(--console-font-size);
+}
+
+.console .console--info {
+  color: var(--console-info-color);
+}
+
+.console .console--success {
+  color: var(--console-success-color);
+}
+
+.console .console--warn {
+  color: var(--console-warn-color);
+}
+
+.console .console--error {
+  color: var(--console-error-color);
+}

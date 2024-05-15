@@ -3,7 +3,7 @@
   right: 12px;
   top: 72px;
   bottom: 72px;
-  background-color: #eee;
+  background-color: var(--background-color);
   border-radius: var(--control-radius);
   overflow-y: auto;
 }

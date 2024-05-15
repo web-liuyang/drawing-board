@@ -10,7 +10,27 @@ select {
 }
 
 :root {
+  --background-color: #eee;
+
   --focus-color: #275dc5;
 
   --control-radius: 4px;
+
+  --statusbar-height: 32px;
+
+  --divider-color: #ccc;
+
+  --divider: 1px solid var(--divider-color);
+
+  --control-panel-tab-height: 32px;
+
+  --console-font-size: 14px;
+
+  --console-info-color: #000;
+
+  --console-success-color: green;
+
+  --console-warn-color: orange;
+
+  --console-error-color: red;
 }

@@ -2,6 +2,7 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { Circle, GraphId, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
+import { Log } from "@log";
 
 export class CircleEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
@@ -9,10 +10,11 @@ export class CircleEventStateMachine extends CanvasEventStateMachine {
 
     if (e.button !== MouseEventButton.Primary) return;
     const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-    const circle = new Circle({ id: generateUUID(), center: origin, radius: 0, editing: true });
+    const graph = new Circle({ id: generateUUID(), center: origin, radius: 0, editing: true });
 
-    this.application.graphController.addGraph(circle);
-    this.application.drawState = new CircleMousedownStateMachine(this.application, circle.id);
+    this.application.graphController.addGraph(graph);
+    this.application.drawState = new CircleMousedownStateMachine(this.application, graph.id);
+    Log.info(`Draw Start ${graph.type}: ${graph.id}`);
   }
 }
 
@@ -28,11 +30,12 @@ class CircleMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const circle = this.application.graphController.findGraph<Circle>(this.id)!;
+    const graph = this.application.graphController.findGraph<Circle>(this.id)!;
 
-    this.application.graphController.updateGraph(circle.id, circle.copyWith({ editing: false }));
+    this.application.graphController.updateGraph(graph.id, graph.copyWith({ editing: false }));
     this.application.saveState();
     this.application.drawState = new CircleEventStateMachine(this.application);
+    Log.info(`Draw Done ${graph.type}: ${graph.id}`);
   }
 
   override onMousemove(e: MouseEvent): void {
@@ -49,8 +52,9 @@ class CircleMousedownStateMachine extends CanvasEventStateMachine {
   override onEscape(): void {
     super.onEscape();
 
-    const circle: Circle = this.application.graphController.findGraph<Circle>(this.id)!;
-    this.application.graphController.removeGraph(circle.id);
+    const graph: Circle = this.application.graphController.findGraph<Circle>(this.id)!;
+    this.application.graphController.removeGraph(graph.id);
     this.application.drawState = new CircleEventStateMachine(this.application);
+    Log.info(`Draw Cancel ${graph.type}: ${graph.id}`);
   }
 }

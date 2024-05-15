@@ -2,6 +2,7 @@ import type { CanvasEventStateMachineOptinos } from "./canvas-event-state-machin
 import { GraphId, Rectangle, generateUUID } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
 import { MouseEventButton } from "../constant/event";
+import { Log } from "@log";
 
 export class RectangleEventStateMachine extends CanvasEventStateMachine {
   override onMousedown(e: MouseEvent): void {
@@ -9,7 +10,7 @@ export class RectangleEventStateMachine extends CanvasEventStateMachine {
 
     if (e.button !== MouseEventButton.Primary) return;
     const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
-    const rectangle = new Rectangle({
+    const graph = new Rectangle({
       id: generateUUID(),
       x1: x,
       y1: y,
@@ -18,8 +19,9 @@ export class RectangleEventStateMachine extends CanvasEventStateMachine {
       editing: true,
     });
 
-    this.application.graphController.addGraph(rectangle);
-    this.application.drawState = new RectangleMousedownStateMachine(this.application, rectangle.id);
+    this.application.graphController.addGraph(graph);
+    this.application.drawState = new RectangleMousedownStateMachine(this.application, graph.id);
+    Log.info(`Draw Start ${graph.type}: ${graph.id}`);
   }
 }
 
@@ -38,10 +40,11 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const rectangle = this.application.graphController.findGraph<Rectangle>(this.id)!;
-    this.application.graphController.updateGraph(rectangle.id, rectangle.copyWith({ editing: false }));
+    const graph = this.application.graphController.findGraph<Rectangle>(this.id)!;
+    this.application.graphController.updateGraph(graph.id, graph.copyWith({ editing: false }));
     this.application.saveState();
     this.application.drawState = new RectangleEventStateMachine(this.application);
+    Log.info(`Draw Done ${graph.type}: ${graph.id}`);
   }
 
   override onMousemove(e: MouseEvent): void {
@@ -74,8 +77,9 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
   override onEscape(): void {
     super.onEscape();
 
-    const rectangle = this.application.graphController.findGraph<Rectangle>(this.id)!;
-    this.application.graphController.removeGraph(rectangle.id);
+    const graph = this.application.graphController.findGraph<Rectangle>(this.id)!;
+    this.application.graphController.removeGraph(graph.id);
     this.application.drawState = new RectangleEventStateMachine(this.application);
+    Log.info(`Draw Cancel ${graph.type}: ${graph.id}`);
   }
 }

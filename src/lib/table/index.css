@@ -6,5 +6,5 @@
 .table .thead {
   position: sticky;
   top: 0;
-  background-color: #eee;
+  background-color: var(--background-color);
 }
