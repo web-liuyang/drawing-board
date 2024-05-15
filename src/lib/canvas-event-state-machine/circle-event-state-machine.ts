@@ -9,7 +9,7 @@ export class CircleEventStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const origin = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const graph = new Circle({ id: generateUUID(), center: origin, radius: 0, editing: true });
 
     this.application.graphController.addGraph(graph);
@@ -42,7 +42,7 @@ class CircleMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousemove(e);
 
     const circle = this.application.graphController.findGraph<Circle>(this.id)!;
-    const position = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const position = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const [x, y] = [position[0] - circle.center[0], position[1] - circle.center[1]];
     const radius = Math.max(Math.abs(x), Math.abs(y));
 

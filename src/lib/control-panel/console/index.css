@@ -1,7 +1,7 @@
 .console {
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   font-size: var(--console-font-size);
 }

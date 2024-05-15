@@ -4,26 +4,54 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+}
+
 input,
 select {
   border-width: 1px;
 }
 
 :root {
+  /* Common */
   --background-color: #eee;
+
+  /* Layout */
+  --header-height: var(--toolbar-height);
+
+  --footer-height: calc(var(--statusbar-height) + var(--control-panel-height));
+
+  --main-height: calc(100vh - var(--header-height) - var(--footer-height));
+
+  --main-left-width: 200px;
+
+  --main-right-width: 300px;
+
+  /* Control */
+  --control-radius: 4px;
 
   --focus-color: #275dc5;
 
-  --control-radius: 4px;
+  /* Toolbar */
+  --toolbar-height: 48px;
 
+  /* Statusbar */
   --statusbar-height: 32px;
 
+  /* Divider */
   --divider-color: #ccc;
 
-  --divider: 1px solid var(--divider-color);
+  --divider-border: 1px solid var(--divider-color);
+
+  /* Control Panel */
+  --control-panel-height: 200px;
 
   --control-panel-tab-height: 32px;
 
+  /* Console */
   --console-font-size: 14px;
 
   --console-info-color: #000;

@@ -1,9 +1,11 @@
 import type { ConsoleController } from "./console";
+import type { ControlPanelComponentOptions } from "./control-panel-component";
 import { Console } from "./console";
 import { ControlPanelComponent } from "./control-panel-component";
 
 interface ControlPanelOptions {
   consoleController: ConsoleController;
+  onResize: ControlPanelComponentOptions["onResize"];
 }
 
 export class ControlPanel {
@@ -26,6 +28,7 @@ export class ControlPanel {
           node: this.console.node,
         },
       ],
+      onResize: options.onResize,
     });
     this.component.activeName = "Console";
   }

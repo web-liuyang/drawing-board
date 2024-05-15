@@ -1,0 +1,46 @@
+#layout-designer {
+  display: flex;
+  flex-direction: column;
+
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--background-color);
+}
+
+#header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  height: var(--header-height);
+}
+
+#main {
+  height: var(--main-height);
+  display: flex;
+}
+
+#header .toolbar {
+  height: var(--toolbar-height);
+}
+
+#main #main-left {
+  width: var(--main-left-width);
+  overflow: auto;
+}
+
+#main #main-center {
+}
+
+#main #main-right {
+  width: var(--main-right-width);
+  overflow: auto;
+}
+
+#footer .control-panel {
+  height: var(--control-panel-height);
+}
+
+#footer .statusbar {
+  height: var(--statusbar-height);
+}

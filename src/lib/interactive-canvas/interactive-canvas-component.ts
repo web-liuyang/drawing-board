@@ -51,7 +51,7 @@ export class InteractiveCanvasComponent implements Component {
 
   private _width: number;
 
-  public _height: number;
+  private _height: number;
 
   constructor(options: InteractiveCanvasComponentOptions) {
     this._width = options.width;

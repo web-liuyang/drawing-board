@@ -27,9 +27,18 @@ export abstract class CanvasEventStateMachine implements CanvasEvent {
   public onWheel(e: WheelEvent): void {
     e.preventDefault();
     e.stopPropagation();
+    // console.log(e.x);
+    // console.log(e.pageX);
+    // console.log(e.layerX);
+    // console.log(e.clientX);
+    console.log(e.offsetX);
+    console.log(e.offsetY);
+    // console.log(e.screenX);
+    // console.log(e.movementX);
     const { interactiveCanvas } = this.application;
     const sign = Math.sign(e.deltaY);
-    const position = interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const position = interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
+    console.log(position);
     const scale = sign > 0 ? 0.9 : 1.1;
     const matrix = interactiveCanvas.matrix.scale(scale, scale, position);
     interactiveCanvas.setTransform(matrix);

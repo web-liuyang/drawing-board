@@ -1,12 +1,8 @@
 .statusbar {
-  position: fixed;
-  bottom: 0px;
-
   width: 100%;
   height: var(--statusbar-height);
   padding: 0 12px;
 
-  background-color: var(--background-color);
   border-top: 1px solid #ccc;
   display: flex;
   align-items: center;

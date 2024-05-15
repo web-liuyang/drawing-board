@@ -14,6 +14,8 @@ import {
 } from ".";
 import { ControlPanel } from "./control-panel";
 import { Log } from "@log";
+import { LayoutDesigner } from "./layout-designer";
+import { getRootProperyValue } from "./utils/element-utils";
 
 import "./style/global.css";
 
@@ -37,16 +39,12 @@ class ApplicationState {
 
 interface ApplicationOptions {
   container: HTMLElement;
-  width: number;
-  height: number;
 }
 
 export class Application {
   private readonly container: HTMLElement;
 
-  private width: number;
-
-  private height: number;
+  private layoutDesigner: LayoutDesigner;
 
   public readonly interactiveCanvas: InteractiveCanvas;
 
@@ -68,13 +66,12 @@ export class Application {
 
   constructor(options: ApplicationOptions) {
     this.container = options.container;
-    this.width = options.width;
-    this.height = options.height;
 
     // Canvas
+    const [canvasWidth, canvasHeight] = this.computeCanvasSize();
     this.interactiveCanvas = new InteractiveCanvas({
-      width: this.width,
-      height: this.height,
+      width: canvasWidth,
+      height: canvasHeight,
       event: {
         onMatrixChange: () => {
           this.drawGraphs();
@@ -90,7 +87,8 @@ export class Application {
         },
         onMousemove: (e: MouseEvent) => {
           this.drawState.onMousemove(e);
-          this.statusbar.update({ position: this.interactiveCanvas.toGlobal([e.clientX, e.clientY]) });
+          const position = this.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
+          this.statusbar.update({ position });
         },
         onMouseup: (e: MouseEvent) => {
           this.drawState.onMouseup(e);
@@ -149,6 +147,7 @@ export class Application {
     // ControlPanel
     this.controlPanel = new ControlPanel({
       consoleController: Log.controller,
+      onResize: () => this.handleResize(),
     });
 
     // Statusbar
@@ -164,20 +163,40 @@ export class Application {
       this.drawGraphs();
     });
 
-    this.container.append(
-      this.interactiveCanvas.node,
-      this.toolbar.node,
-      this.propertyPanel.node,
-      this.controlPanel.node,
-      this.statusbar.node,
-    );
+    this.layoutDesigner = new LayoutDesigner({
+      toolbar: this.toolbar,
+      interactiveCanvas: this.interactiveCanvas,
+      propertyPanel: this.propertyPanel,
+      controlPanel: this.controlPanel,
+      statusbar: this.statusbar,
+    });
+
+    this.container.append(this.layoutDesigner.node);
+
+    window!.addEventListener("resize", () => this.handleResize(), false);
   }
 
-  public resize(width: number, height: number): void {
-    this.width = width;
-    this.height = height;
-    this.interactiveCanvas.resize(width, height);
+  private handleResize() {
+    const [canvasWidth, canvasHeight] = this.computeCanvasSize();
+    this.interactiveCanvas.resize(canvasWidth, canvasHeight);
     this.drawGraphs();
+  }
+
+  private computeCanvasSize(): [number, number] {
+    const { innerWidth, innerHeight } = window;
+
+    const canvasWidth =
+      innerWidth -
+      parseFloat(getRootProperyValue("--main-left-width")) -
+      parseFloat(getRootProperyValue("--main-right-width"));
+
+    const canvasHeight =
+      innerHeight -
+      parseFloat(getRootProperyValue("--toolbar-height")) -
+      parseFloat(getRootProperyValue("--control-panel-height")) -
+      parseFloat(getRootProperyValue("--statusbar-height"));
+
+    return [canvasWidth, canvasHeight];
   }
 
   private drawGraphs(): void {
@@ -197,6 +216,7 @@ export class Application {
     this.toolbar.render(ToolButton.Selection);
     this.statusbar.render([0, 0], ToolButton.Selection);
     this.controlPanel.render();
+    this.layoutDesigner.render();
   }
 
   public saveState() {

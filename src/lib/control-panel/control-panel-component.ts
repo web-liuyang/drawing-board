@@ -1,10 +1,11 @@
 import { icon } from "../icon";
-import { removeElementChild } from "../utils/element-utils";
+import { getRootProperyValue, removeElementChild, setRootProperyValue } from "../utils/element-utils";
 
 import "./index.css";
 
 export interface ControlPanelComponentOptions {
   items: ControlPanelItem[];
+  onResize: () => void;
 }
 
 export interface ControlPanelItem {
@@ -19,9 +20,9 @@ export class ControlPanelComponent implements Component {
     return this.oControlPanel;
   }
 
-  private height: number = 200;
-
   private items: ControlPanelItem[];
+
+  private onResize: ControlPanelComponentOptions["onResize"];
 
   private _activeName?: string;
 
@@ -35,9 +36,9 @@ export class ControlPanelComponent implements Component {
 
   public constructor(options: ControlPanelComponentOptions) {
     this.items = options.items;
+    this.onResize = options.onResize;
     this.oControlPanel = document.createElement("div");
     this.oControlPanel.className = "control-panel";
-    this.oControlPanel.style.height = `${this.height}px`;
   }
 
   public clean(): void {
@@ -55,15 +56,13 @@ export class ControlPanelComponent implements Component {
 
     oDrag.addEventListener("mousedown", e => {
       const y = e.clientY;
-
+      const height = this.getHeight();
       const onMousemove = (e: MouseEvent) => {
         const dy = e.clientY - y;
-        const height = this.height - dy < 0 ? 0 : this.height - dy;
-        this.oControlPanel.style.height = `${height}px`;
+        this.setHeight(height - dy < 0 ? 0 : height - dy);
       };
 
       const onMouseup = () => {
-        this.height = parseFloat(this.oControlPanel.style.height);
         window.removeEventListener("mousemove", onMousemove, false);
         window.removeEventListener("mouseup", onMouseup, false);
       };
@@ -75,15 +74,20 @@ export class ControlPanelComponent implements Component {
     return oDrag;
   }
 
+  private getHeight(): number {
+    return parseFloat(getRootProperyValue("--control-panel-height"));
+  }
+
+  private setHeight(height: number): void {
+    setRootProperyValue("--control-panel-height", `${height}px`);
+    this.onResize();
+  }
+
   private createClose(): HTMLElement {
     const oClose = document.createElement("div");
     oClose.className = "close";
     oClose.append(icon("close"));
-
-    oClose.addEventListener("click", () => {
-      this.height = 0;
-      this.oControlPanel.style.height = `0px`;
-    });
+    oClose.addEventListener("click", () => this.setHeight(0));
 
     return oClose;
   }

@@ -9,7 +9,7 @@ export class RectangleEventStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const [x, y] = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const graph = new Rectangle({
       id: generateUUID(),
       x1: x,
@@ -51,7 +51,7 @@ class RectangleMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousemove(e);
 
     const rectangle = this.rectangle;
-    const [x, y] = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const [x, y] = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const { x1, y1, x2, y2 } = rectangle;
     const [dx, dy] = [x - x2, y - y2];
 

@@ -7,7 +7,7 @@ export class SelectionEventStateMachine extends CanvasEventStateMachine {
     super.onMouseup(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const position = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const position = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const graphs = this.application.graphController.graphs;
 
     const newGraphs: Graph[] = Array(graphs.length);

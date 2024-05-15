@@ -1,12 +1,9 @@
 .toolbar {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-}
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-.toolbar .toolbar__button {
-  margin-right: 10px;
+  gap: 8px;
 }
 
 .toolbar .toolbar__button.codicon {

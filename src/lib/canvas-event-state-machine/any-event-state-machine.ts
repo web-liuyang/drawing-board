@@ -9,7 +9,7 @@ export class AnyEventStateMachine extends CanvasEventStateMachine {
     super.onMousedown(e);
 
     if (e.button !== MouseEventButton.Primary) return;
-    const origin = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const origin = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const graph = new Any({ id: generateUUID(), points: [origin], editing: true });
 
     this.application.graphController.addGraph(graph);
@@ -43,7 +43,7 @@ class AnyMousedownStateMachine extends CanvasEventStateMachine {
     super.onMousemove(e);
 
     const any = this.application.graphController.findGraph<Any>(this.id)!;
-    const position = this.application.interactiveCanvas.toGlobal([e.clientX, e.clientY]);
+    const position = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
 
     this.application.graphController.updateGraph(any.id, any.copyWith({ points: [...any.points, position] }));
   }
