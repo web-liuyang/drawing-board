@@ -1,5 +1,5 @@
 import { icon } from "../icon";
-import { getRootProperyValue, removeElementChild, setRootProperyValue } from "../utils/element-utils";
+import { removeElementChild, setRootProperyValue } from "../utils/element-utils";
 
 import "./index.css";
 
@@ -50,51 +50,20 @@ export class ControlPanelComponent implements Component {
     this._activeName = activeName;
   }
 
-  private createDrag(): HTMLElement {
-    const oDrag = document.createElement("div");
-    oDrag.className = "drag";
-
-    oDrag.addEventListener("mousedown", e => {
-      const y = e.clientY;
-      const height = this.getHeight();
-      const onMousemove = (e: MouseEvent) => {
-        const dy = e.clientY - y;
-        this.setHeight(height - dy < 0 ? 0 : height - dy);
-      };
-
-      const onMouseup = () => {
-        window.removeEventListener("mousemove", onMousemove, false);
-        window.removeEventListener("mouseup", onMouseup, false);
-      };
-
-      window.addEventListener("mousemove", onMousemove, false);
-      window.addEventListener("mouseup", onMouseup, false);
-    });
-
-    return oDrag;
-  }
-
-  private getHeight(): number {
-    return parseFloat(getRootProperyValue("--control-panel-height"));
-  }
-
-  private setHeight(height: number): void {
-    setRootProperyValue("--control-panel-height", `${height}px`);
-    this.onResize();
-  }
-
   private createClose(): HTMLElement {
     const oClose = document.createElement("div");
     oClose.className = "close";
     oClose.append(icon("close"));
-    oClose.addEventListener("click", () => this.setHeight(0));
+    oClose.addEventListener("click", () => {
+      setRootProperyValue("--control-panel-height", `0px`);
+      this.onResize();
+    });
 
     return oClose;
   }
 
   public render(): void {
     this.clean();
-    const oDrag = this.createDrag();
 
     const oTabbar = document.createElement("div");
     oTabbar.className = "tabbar";
@@ -115,6 +84,6 @@ export class ControlPanelComponent implements Component {
       }
     }
 
-    this.oControlPanel.append(oDrag, oTabbar, oTabview);
+    this.oControlPanel.append(oTabbar, oTabview);
   }
 }

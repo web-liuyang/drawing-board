@@ -4,6 +4,7 @@
   justify-content: center;
 
   gap: 8px;
+  height: var(--toolbar-height);
 }
 
 .toolbar .toolbar__button.codicon {

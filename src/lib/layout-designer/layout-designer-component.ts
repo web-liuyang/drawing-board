@@ -1,17 +1,22 @@
 import { ControlPanel } from "../control-panel";
+import { Drag } from "../drag";
 import { InteractiveCanvas } from "../interactive-canvas";
 import { PropertyPanel } from "../property-panel";
+import { ResourcePanel } from "../resource-panel";
 import { Statusbar } from "../statusbar";
 import { Toolbar } from "../toolbar";
+import { getRootProperyValue, setRootProperyValue } from "../utils/element-utils";
 
 import "./index.css";
 
 export interface LayoutDesignerComponentOptions {
+  resourcePanel: ResourcePanel;
   toolbar: Toolbar;
   interactiveCanvas: InteractiveCanvas;
   propertyPanel: PropertyPanel;
   controlPanel: ControlPanel;
   statusbar: Statusbar;
+  onResize: () => void;
 }
 
 export class LayoutDesignerComponent implements Component {
@@ -62,10 +67,49 @@ export class LayoutDesignerComponent implements Component {
     this.oLayoutDesigner.appendChild(this.oFooter);
 
     this.oHeader.appendChild(options.toolbar.node);
+    this.oMainLeft.append(
+      options.resourcePanel.node,
+      new Drag({
+        direction: ["top", "right"],
+        getSize: () => [parseFloat(getRootProperyValue("--main-left-width")), 0],
+        setSize: ([w]) => {
+          if (w < 200) return;
+          setRootProperyValue("--main-left-width", `${w}px`);
+          options.onResize();
+        },
+      }).node,
+    );
     this.oMainCenter.appendChild(options.interactiveCanvas.node);
-    this.oMainRight.appendChild(options.propertyPanel.node);
-    this.oFooter.append(options.controlPanel.node, options.statusbar.node);
+    this.oMainRight.append(
+      new Drag({
+        direction: ["top", "left"],
+        getSize: () => [parseFloat(getRootProperyValue("--main-right-width")), 0],
+        setSize: ([w]) => {
+          if (w < 200) return;
+          setRootProperyValue("--main-right-width", `${w}px`);
+          options.onResize();
+        },
+      }).node,
+      options.propertyPanel.node,
+    );
+    this.oFooter.append(
+      new Drag({
+        direction: ["top", "left"],
+        getSize: () => [0, parseFloat(getRootProperyValue("--control-panel-height"))],
+        setSize: ([, h]) => {
+          if (h < 0) return;
+          setRootProperyValue("--control-panel-height", `${h}px`);
+          options.onResize();
+        },
+      }).node,
+      options.controlPanel.node,
+      options.statusbar.node,
+    );
+
+    this.bindEvent();
   }
+
+  private bindEvent(): void {}
 
   public clean(): void {}
 

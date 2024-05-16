@@ -10,6 +10,10 @@ export interface PropertyPanelComponentOptions {
 export class PropertyPanelComponent implements Component {
   private oPropertyPanel: HTMLElement;
 
+  private oTitlebar: HTMLElement;
+
+  private oContent: HTMLElement;
+
   private dynamicForm?: DynamicForm;
 
   private onChangedGraph: PropertyPanelComponentOptions["onChangedGraph"];
@@ -31,13 +35,23 @@ export class PropertyPanelComponent implements Component {
   constructor(options: PropertyPanelComponentOptions) {
     this.oPropertyPanel = document.createElement("div");
     this.oPropertyPanel.className = "property-panel";
+
+    this.oTitlebar = document.createElement("div");
+    this.oTitlebar.className = "property-panel__titlebar";
+    this.oTitlebar.textContent = "Property Panel";
+
+    this.oContent = document.createElement("div");
+    this.oContent.className = "property-panel__content";
+
+    this.oPropertyPanel.append(this.oTitlebar, this.oContent);
+
     this.onChangedGraph = options.onChangedGraph;
   }
 
   public clean(): void {
     this.dynamicForm?.clean();
     this.dynamicForm = undefined;
-    removeElementChild(this.oPropertyPanel);
+    removeElementChild(this.oContent);
   }
 
   public update(graph: Graph): void {
@@ -73,6 +87,6 @@ export class PropertyPanelComponent implements Component {
     });
 
     this.dynamicForm.render(this.graph ? graphToFormGroups(this.graph) : []);
-    this.oPropertyPanel.append(this.dynamicForm.node);
+    this.oContent.append(this.dynamicForm.node);
   }
 }

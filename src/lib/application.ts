@@ -1,6 +1,5 @@
 import type { CanvasEventStateMachine, Graph } from ".";
 import {
-  Toolbar,
   SelectionEventStateMachine,
   CircleEventStateMachine,
   RectangleEventStateMachine,
@@ -8,13 +7,15 @@ import {
   ToolButton,
   GraphController,
   HistoryController,
+  LayoutDesigner,
+  Toolbar,
+  ResourcePanel,
   InteractiveCanvas,
-  Statusbar,
   PropertyPanel,
+  ControlPanel,
+  Statusbar,
 } from ".";
-import { ControlPanel } from "./control-panel";
 import { Log } from "@log";
-import { LayoutDesigner } from "./layout-designer";
 import { getRootProperyValue } from "./utils/element-utils";
 
 import "./style/global.css";
@@ -46,6 +47,8 @@ export class Application {
 
   private layoutDesigner: LayoutDesigner;
 
+  public readonly resourcePanel: ResourcePanel;
+
   public readonly interactiveCanvas: InteractiveCanvas;
 
   public readonly toolbar: Toolbar;
@@ -66,6 +69,8 @@ export class Application {
 
   constructor(options: ApplicationOptions) {
     this.container = options.container;
+
+    this.resourcePanel = new ResourcePanel({});
 
     // Canvas
     const [canvasWidth, canvasHeight] = this.computeCanvasSize();
@@ -164,11 +169,15 @@ export class Application {
     });
 
     this.layoutDesigner = new LayoutDesigner({
+      resourcePanel: this.resourcePanel,
       toolbar: this.toolbar,
       interactiveCanvas: this.interactiveCanvas,
       propertyPanel: this.propertyPanel,
       controlPanel: this.controlPanel,
       statusbar: this.statusbar,
+      onResize: () => {
+        this.handleResize();
+      },
     });
 
     this.container.append(this.layoutDesigner.node);
@@ -216,6 +225,7 @@ export class Application {
     this.toolbar.render(ToolButton.Selection);
     this.statusbar.render([0, 0], ToolButton.Selection);
     this.controlPanel.render();
+    this.resourcePanel.render();
     this.layoutDesigner.render();
   }
 

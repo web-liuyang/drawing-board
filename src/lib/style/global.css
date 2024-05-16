@@ -46,6 +46,9 @@ select {
 
   --divider-border: 1px solid var(--divider-color);
 
+  /* Drag */
+  --drag-thickness: 4px;
+
   /* Control Panel */
   --control-panel-height: 200px;
 

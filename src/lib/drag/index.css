@@ -1,0 +1,10 @@
+.drag {
+}
+
+.drag.active {
+  background-color: var(--focus-color);
+}
+
+.drag:hover {
+  background-color: var(--focus-color);
+}

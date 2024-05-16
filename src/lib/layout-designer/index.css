@@ -13,6 +13,7 @@
   justify-content: center;
 
   height: var(--header-height);
+  border-bottom: var(--divider-border);
 }
 
 #main {
@@ -20,27 +21,49 @@
   display: flex;
 }
 
-#header .toolbar {
-  height: var(--toolbar-height);
+#main #main-left {
+  position: relative;
+  width: var(--main-left-width);
+  border-right: var(--divider-border);
 }
 
-#main #main-left {
-  width: var(--main-left-width);
-  overflow: auto;
+#main #main-left > .drag {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  z-index: 1;
+  width: var(--drag-thickness);
+  height: 100%;
 }
 
 #main #main-center {
 }
 
 #main #main-right {
+  position: relative;
   width: var(--main-right-width);
-  overflow: auto;
+  border-left: var(--divider-border);
 }
 
-#footer .control-panel {
-  height: var(--control-panel-height);
+#main #main-right > .drag {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  z-index: 1;
+  width: var(--drag-thickness);
+  height: 100%;
 }
 
-#footer .statusbar {
-  height: var(--statusbar-height);
+#footer {
+  position: relative;
+  border-top: var(--divider-border);
+  background-color: var(--background-color);
+}
+
+#footer > .drag {
+  position: absolute;
+  top: -3px;
+  z-index: 1;
+  width: 100%;
+  height: var(--drag-thickness);
 }

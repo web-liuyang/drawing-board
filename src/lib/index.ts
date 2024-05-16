@@ -7,3 +7,6 @@ export * from "./interactive-canvas";
 export * from "./matrix";
 export * from "./statusbar";
 export * from "./property-panel";
+export * from "./control-panel";
+export * from "./layout-designer";
+export * from "./resource-panel";
