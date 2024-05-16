@@ -9,6 +9,7 @@ import {
   HistoryController,
   LayoutDesigner,
   Toolbar,
+  GraphList,
   ResourcePanel,
   InteractiveCanvas,
   PropertyPanel,
@@ -46,6 +47,8 @@ export class Application {
   private readonly container: HTMLElement;
 
   public readonly toolbar: Toolbar;
+
+  public readonly graphList: GraphList;
 
   public readonly resourcePanel: ResourcePanel;
 
@@ -98,7 +101,13 @@ export class Application {
       },
     });
 
-    this.resourcePanel = new ResourcePanel({});
+    this.graphList = new GraphList({
+      graphController: this.graphController,
+    });
+
+    this.resourcePanel = new ResourcePanel({
+      graphList: this.graphList,
+    });
 
     // Canvas
     const [canvasWidth, canvasHeight] = this.computeCanvasSize();
@@ -143,7 +152,6 @@ export class Application {
     // PropertyPanel
     this.propertyPanel = new PropertyPanel({
       onChangedGraph: graph => {
-        console.log("onChangedGraph: ", graph);
         this.graphController.updateGraph(graph.id, graph);
         this.propertyPanel.update(graph);
       },
@@ -169,12 +177,12 @@ export class Application {
     });
 
     this.layoutDesigner = new LayoutDesigner({
-      resourcePanel: this.resourcePanel,
-      toolbar: this.toolbar,
-      interactiveCanvas: this.interactiveCanvas,
-      propertyPanel: this.propertyPanel,
-      controlPanel: this.controlPanel,
-      statusbar: this.statusbar,
+      resourcePanel: this.resourcePanel.node,
+      toolbar: this.toolbar.node,
+      interactiveCanvas: this.interactiveCanvas.node,
+      propertyPanel: this.propertyPanel.node,
+      controlPanel: this.controlPanel.node,
+      statusbar: this.statusbar.node,
       onResize: () => {
         this.handleResize();
       },
@@ -221,10 +229,12 @@ export class Application {
 
   public render(): void {
     this.drawGraphs();
-    this.propertyPanel.render(this.graphController.selectedGraphs[0]);
     this.toolbar.render(ToolButton.Selection);
-    this.statusbar.render([0, 0], ToolButton.Selection);
+    this.graphList.render();
+    this.propertyPanel.render(this.graphController.selectedGraphs[0]);
     this.controlPanel.render();
+    this.statusbar.render([0, 0], ToolButton.Selection);
+
     this.resourcePanel.render();
     this.layoutDesigner.render();
   }

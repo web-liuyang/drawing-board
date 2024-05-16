@@ -10,3 +10,4 @@ export * from "./property-panel";
 export * from "./control-panel";
 export * from "./layout-designer";
 export * from "./resource-panel";
+export * from "./graph-list";

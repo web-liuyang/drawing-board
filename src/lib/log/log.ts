@@ -4,7 +4,6 @@ export class Log {
   static readonly controller: ConsoleController = new ConsoleController([]);
 
   static info(msg: string): void {
-    console.log("A");
     Log.controller.info(msg);
   }
 

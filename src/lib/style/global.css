@@ -19,6 +19,8 @@ select {
   /* Common */
   --background-color: #eee;
 
+  --background-color-secondary: #999;
+
   /* Layout */
   --header-height: var(--toolbar-height);
 

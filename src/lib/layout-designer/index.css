@@ -54,6 +54,30 @@
   height: 100%;
 }
 
+#main .resource-panel,
+#main .property-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#main .resource-panel__titlebar,
+#main .property-panel__titlebar {
+  padding: 12px;
+  font-weight: bold;
+  border-bottom: var(--divider-border);
+}
+
+#main .resource-panel__content,
+#main .property-panel__content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#main .property-panel__content {
+  padding: 0 12px;
+}
+
 #footer {
   position: relative;
   border-top: var(--divider-border);

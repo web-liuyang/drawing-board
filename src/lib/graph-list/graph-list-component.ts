@@ -1,0 +1,74 @@
+import { Graph, GraphController } from "../graph";
+import { iconName } from "../icon";
+import { removeElementChild } from "../utils/element-utils";
+
+import "./index.css";
+
+export interface GraphListComponentOptions {
+  graphController: GraphController;
+}
+
+export class GraphListComponent implements Component {
+  private oGraphList: HTMLElement;
+
+  public get node(): HTMLElement {
+    return this.oGraphList;
+  }
+
+  private readonly graphController: GraphController;
+
+  constructor(options: GraphListComponentOptions) {
+    this.graphController = options.graphController;
+
+    this.oGraphList = document.createElement("div");
+    this.oGraphList.className = "graph-list";
+
+    this.graphController.addListener(() => {
+      this.render();
+    });
+  }
+
+  private createGraphItem(graph: Graph): HTMLElement {
+    const oGraphItem = document.createElement("div");
+    oGraphItem.className = "graph-list__item";
+    if (graph.selected) oGraphItem.className += " selected";
+    const oSpan = document.createElement("span");
+    oSpan.textContent = `${graph.type} (${graph.id.slice(0, 8)})`;
+    const oRemoveButton = document.createElement("button");
+    oRemoveButton.className = iconName("remove");
+    oGraphItem.append(oSpan, oRemoveButton);
+
+    oRemoveButton.addEventListener("click", e => {
+      e.stopPropagation();
+      this.onRemoveGraphItem(graph);
+    });
+    oGraphItem.addEventListener("click", () => this.onClickGraphItem(graph));
+    return oGraphItem;
+  }
+
+  private onRemoveGraphItem(graph: Graph): void {
+    this.graphController.removeGraph(graph.id);
+  }
+
+  private onClickGraphItem(graph: Graph): void {
+    this.graphController.updateGraphs([
+      ...this.graphController.selectedGraphs.map(item => item.copyWith({ selected: false })),
+      graph.copyWith({ selected: true }),
+    ]);
+  }
+
+  public clean(): void {
+    removeElementChild(this.oGraphList);
+  }
+
+  public update(): void {}
+
+  public render(): void {
+    this.clean();
+
+    for (const graph of this.graphController.graphs) {
+      const oGraphItem = this.createGraphItem(graph);
+      this.oGraphList.append(oGraphItem);
+    }
+  }
+}

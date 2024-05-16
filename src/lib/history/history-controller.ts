@@ -26,7 +26,6 @@ export class HistoryController<T> extends ChangeNotifier {
     this._histories.push(history);
     this._index++;
     this.notifyListeners();
-    console.log(this._histories);
   }
 
   get state(): T {

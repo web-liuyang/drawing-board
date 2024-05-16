@@ -1,15 +1,27 @@
+import { GraphList } from "../graph-list";
+
 import "./index.css";
+
+export interface ResourcePanelComponentOptions {
+  graphList: GraphList;
+}
 
 export class ResourcePanelComponent implements Component {
   private oResourcePanel: HTMLElement;
-
-  private oTitlebar: HTMLElement;
 
   public get node(): HTMLElement {
     return this.oResourcePanel;
   }
 
-  constructor() {
+  private oTitlebar: HTMLElement;
+
+  private oContent: HTMLElement;
+
+  private graphList: GraphList;
+
+  constructor(options: ResourcePanelComponentOptions) {
+    this.graphList = options.graphList;
+
     this.oResourcePanel = document.createElement("div");
     this.oResourcePanel.className = "resource-panel";
 
@@ -17,10 +29,17 @@ export class ResourcePanelComponent implements Component {
     this.oTitlebar.className = "resource-panel__titlebar";
     this.oTitlebar.textContent = "Resource Panel";
 
-    this.oResourcePanel.append(this.oTitlebar);
+    this.oContent = document.createElement("div");
+    this.oContent.className = "resource-panel__content";
+
+    this.oResourcePanel.append(this.oTitlebar, this.oContent);
+
+    this.oContent.append(this.graphList.node);
   }
 
-  public clean(): void {}
+  public clean(): void {
+    this.graphList.clean();
+  }
 
   public update(): void {}
 

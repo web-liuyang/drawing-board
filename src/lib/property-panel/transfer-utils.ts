@@ -142,7 +142,6 @@ function anyGeneralFormGroup(any: Any): FormGroup {
         value: any.points,
         onValid(value) {
           for (let index = 0, length = value.length; index < length; index++) {
-            console.log(index, length);
             const [x, y] = value[index];
             if (!isNumberCorrect(x)) {
               return `Index: ${index}, Point x must be a number`;

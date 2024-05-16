@@ -1,6 +1,6 @@
-import { ResourcePanelComponent } from "./resource-panel-component";
+import { ResourcePanelComponent, ResourcePanelComponentOptions } from "./resource-panel-component";
 
-export interface ResourcePanelOptions {}
+export interface ResourcePanelOptions extends ResourcePanelComponentOptions {}
 
 export class ResourcePanel {
   private component: ResourcePanelComponent;
@@ -10,7 +10,7 @@ export class ResourcePanel {
   }
 
   constructor(options: ResourcePanelOptions) {
-    this.component = new ResourcePanelComponent();
+    this.component = new ResourcePanelComponent(options);
   }
 
   public render(): void {

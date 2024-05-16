@@ -1,0 +1,17 @@
+.graph-list {
+  height: 100%;
+}
+
+.graph-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: var(--divider-border);
+}
+
+.graph-list__item.selected {
+  background-color: var(--background-color-secondary);
+}

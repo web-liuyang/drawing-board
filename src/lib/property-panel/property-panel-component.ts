@@ -62,9 +62,9 @@ export class PropertyPanelComponent implements Component {
 
     if (!this.dynamicForm) {
       this.render();
-    } else if (newGraph === undefined || oldGraph === undefined) {
+    } else if (newGraph === undefined) {
       this.clean();
-    } else if (newGraph.id !== oldGraph.id) {
+    } else if (newGraph.id !== oldGraph?.id) {
       this.render();
     } else if (!oldGraph.equals(newGraph)) {
       this.dynamicForm.update(graphToFormGroups(newGraph));

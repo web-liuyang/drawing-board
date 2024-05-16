@@ -1,21 +1,15 @@
-import { ControlPanel } from "../control-panel";
 import { Drag } from "../drag";
-import { InteractiveCanvas } from "../interactive-canvas";
-import { PropertyPanel } from "../property-panel";
-import { ResourcePanel } from "../resource-panel";
-import { Statusbar } from "../statusbar";
-import { Toolbar } from "../toolbar";
 import { getRootProperyValue, setRootProperyValue } from "../utils/element-utils";
 
 import "./index.css";
 
 export interface LayoutDesignerComponentOptions {
-  resourcePanel: ResourcePanel;
-  toolbar: Toolbar;
-  interactiveCanvas: InteractiveCanvas;
-  propertyPanel: PropertyPanel;
-  controlPanel: ControlPanel;
-  statusbar: Statusbar;
+  resourcePanel: HTMLElement;
+  toolbar: HTMLElement;
+  interactiveCanvas: HTMLElement;
+  propertyPanel: HTMLElement;
+  controlPanel: HTMLElement;
+  statusbar: HTMLElement;
   onResize: () => void;
 }
 
@@ -66,9 +60,9 @@ export class LayoutDesignerComponent implements Component {
     this.oLayoutDesigner.appendChild(this.oMain);
     this.oLayoutDesigner.appendChild(this.oFooter);
 
-    this.oHeader.appendChild(options.toolbar.node);
+    this.oHeader.appendChild(options.toolbar);
     this.oMainLeft.append(
-      options.resourcePanel.node,
+      options.resourcePanel,
       new Drag({
         direction: ["top", "right"],
         getSize: () => [parseFloat(getRootProperyValue("--main-left-width")), 0],
@@ -79,18 +73,18 @@ export class LayoutDesignerComponent implements Component {
         },
       }).node,
     );
-    this.oMainCenter.appendChild(options.interactiveCanvas.node);
+    this.oMainCenter.appendChild(options.interactiveCanvas);
     this.oMainRight.append(
       new Drag({
         direction: ["top", "left"],
         getSize: () => [parseFloat(getRootProperyValue("--main-right-width")), 0],
         setSize: ([w]) => {
-          if (w < 200) return;
+          if (w < 300) return;
           setRootProperyValue("--main-right-width", `${w}px`);
           options.onResize();
         },
       }).node,
-      options.propertyPanel.node,
+      options.propertyPanel,
     );
     this.oFooter.append(
       new Drag({
@@ -102,8 +96,8 @@ export class LayoutDesignerComponent implements Component {
           options.onResize();
         },
       }).node,
-      options.controlPanel.node,
-      options.statusbar.node,
+      options.controlPanel,
+      options.statusbar,
     );
 
     this.bindEvent();
