@@ -45,19 +45,19 @@ interface ApplicationOptions {
 export class Application {
   private readonly container: HTMLElement;
 
-  private layoutDesigner: LayoutDesigner;
+  public readonly toolbar: Toolbar;
 
   public readonly resourcePanel: ResourcePanel;
 
   public readonly interactiveCanvas: InteractiveCanvas;
-
-  public readonly toolbar: Toolbar;
 
   public readonly propertyPanel: PropertyPanel;
 
   public readonly controlPanel: ControlPanel;
 
   public readonly statusbar: Statusbar;
+
+  private layoutDesigner: LayoutDesigner;
 
   public readonly graphController: GraphController = new GraphController();
 
@@ -69,6 +69,34 @@ export class Application {
 
   constructor(options: ApplicationOptions) {
     this.container = options.container;
+
+    // Toolbar
+    this.toolbar = new Toolbar({
+      onClick: (button: ToolButton) => {
+        if (button === ToolButton.Backward) {
+          this.historyController.backward();
+          const { graphs } = this.historyController.state;
+          this.graphController.setGraphs(graphs);
+          return;
+        }
+
+        if (button === ToolButton.Forward) {
+          this.historyController.forward();
+          const { graphs } = this.historyController.state;
+          this.graphController.setGraphs(graphs);
+          return;
+        }
+
+        if (this.toolbar.seletedToolButton === button) return;
+        this.toolbar.update(button);
+
+        const DrawState = ToolButtonToDrawState[button];
+        if (DrawState) {
+          this.drawState = new DrawState(this);
+          this.statusbar.update({ stateText: button });
+        }
+      },
+    });
 
     this.resourcePanel = new ResourcePanel({});
 
@@ -109,34 +137,6 @@ export class Application {
             this.drawState = new SelectionEventStateMachine(this);
           }
         },
-      },
-    });
-
-    // Toolbar
-    this.toolbar = new Toolbar({
-      onClick: (button: ToolButton) => {
-        if (button === ToolButton.Backward) {
-          this.historyController.backward();
-          const { graphs } = this.historyController.state;
-          this.graphController.setGraphs(graphs);
-          return;
-        }
-
-        if (button === ToolButton.Forward) {
-          this.historyController.forward();
-          const { graphs } = this.historyController.state;
-          this.graphController.setGraphs(graphs);
-          return;
-        }
-
-        if (this.toolbar.seletedToolButton === button) return;
-        this.toolbar.update(button);
-
-        const DrawState = ToolButtonToDrawState[button];
-        if (DrawState) {
-          this.drawState = new DrawState(this);
-          this.statusbar.update({ stateText: button });
-        }
       },
     });
 
