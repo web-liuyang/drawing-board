@@ -1,6 +1,8 @@
+import { Log } from "@log";
 import { Graph, GraphController, GraphId } from "../graph";
 import { iconName } from "../icon";
 import { removeElementChild } from "../utils/element-utils";
+import { Application } from "../application";
 
 import "./index.css";
 
@@ -38,13 +40,15 @@ export class GraphListComponent implements Component {
     oRemoveButton.className = iconName("remove");
     oGraphItem.append(oSpan, oRemoveButton);
 
-    oRemoveButton.addEventListener("click", () => this.onRemoveGraph(graph.id));
+    oRemoveButton.addEventListener("click", () => this.onRemoveGraph(graph));
     oGraphItem.addEventListener("click", () => this.onClickGraph(graph.id));
     return oGraphItem;
   }
 
-  private onRemoveGraph(id: GraphId): void {
-    this.graphController.removeGraph(id);
+  private onRemoveGraph(graph: Graph): void {
+    this.graphController.removeGraph(graph.id);
+    Log.info(`Removed Done ${graph.type}: ${graph.id}`);
+    Application.instance!.saveState();
   }
 
   private onClickGraph(id: GraphId): void {

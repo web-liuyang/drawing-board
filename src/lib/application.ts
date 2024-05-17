@@ -44,6 +44,20 @@ interface ApplicationOptions {
 }
 
 export class Application {
+  private static _instance?: Application;
+
+  public static get instance(): Application | undefined {
+    return Application._instance;
+  }
+
+  public static create(container: HTMLElement): Application {
+    if (!Application._instance) {
+      Application._instance = new Application({ container });
+    }
+
+    return Application._instance;
+  }
+
   private readonly container: HTMLElement;
 
   public readonly toolbar: Toolbar;
