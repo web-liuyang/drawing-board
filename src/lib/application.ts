@@ -135,6 +135,9 @@ export class Application {
         onMouseup: (e: MouseEvent) => {
           this.drawState.onMouseup(e);
         },
+        onClick: (e: MouseEvent) => {
+          this.drawState.onClick(e);
+        },
         onEscape: () => {
           const name = this.drawState.constructor.name;
           const toolButton: ToolButton | undefined = DrawStateToToolButton[name];

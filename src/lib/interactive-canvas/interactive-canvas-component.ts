@@ -1,3 +1,4 @@
+import type { CanvasEvent } from "../canvas-event-state-machine";
 import { Matrix } from "../matrix";
 import { absoluteError } from "../math";
 
@@ -6,16 +7,8 @@ import { absoluteError } from "../math";
  */
 type Viewbox = [number, number, number, number];
 
-interface InteractiveCanvasEvent {
+interface InteractiveCanvasEvent extends CanvasEvent {
   onMatrixChange: ValueFunction<Matrix>;
-
-  onKeydown: ValueFunction<KeyboardEvent>;
-  onWheel: ValueFunction<WheelEvent>;
-  onMousedown: ValueFunction<MouseEvent>;
-  onMousemove: ValueFunction<MouseEvent>;
-  onMouseup: ValueFunction<MouseEvent>;
-
-  onEscape: VoidFunction;
 }
 
 export interface InteractiveCanvasComponentOptions {
@@ -80,6 +73,23 @@ export class InteractiveCanvasComponent implements Component {
     this.oCanvas.addEventListener("mousedown", e => event.onMousedown(e), false);
     this.oCanvas.addEventListener("mousemove", e => event.onMousemove(e), false);
     this.oCanvas.addEventListener("mouseup", e => event.onMouseup(e), false);
+    this.oCanvas.addEventListener("click", e => event.onClick(e), false);
+
+    // window.addEventListener("click", e => {
+    //   const target = e.target as HTMLElement;
+
+    //   function isCanvasEvent(target: HTMLElement): boolean {
+    //     if (target.id === "main-center") return true;
+    //     if (!target.parentElement) return false;
+    //     return isCanvasEvent(target.parentElement);
+    //   }
+
+    //   if (isCanvasEvent(target)) {
+    //     console.log("canvas event");
+    //   } else {
+    //     console.log("not canvas event");
+    //   }
+    // });
   }
 
   public setTransform(matrix: Matrix): void {

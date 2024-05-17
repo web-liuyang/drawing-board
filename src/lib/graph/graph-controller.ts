@@ -23,6 +23,10 @@ export class GraphController extends ChangeNotifier {
     this.notifyListeners();
   }
 
+  public has(id: GraphId): boolean {
+    return this._graphs.some(g => g.id === id);
+  }
+
   public findGraph<T extends Graph>(id: GraphId): T | undefined {
     return this._graphs.find(g => g.id === id) as T | undefined;
   }

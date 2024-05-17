@@ -7,6 +7,7 @@ export interface CanvasEvent {
   onMousedown(e: MouseEvent): void;
   onMousemove(e: MouseEvent): void;
   onMouseup(e: MouseEvent): void;
+  onClick(e: MouseEvent): void;
 
   onEscape(): void;
 }
@@ -26,7 +27,6 @@ export abstract class CanvasEventStateMachine implements CanvasEvent {
 
   public onWheel(e: WheelEvent): void {
     e.preventDefault();
-    e.stopPropagation();
     const { interactiveCanvas } = this.application;
     const sign = Math.sign(e.deltaY);
     const position = interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
@@ -50,6 +50,8 @@ export abstract class CanvasEventStateMachine implements CanvasEvent {
   public onMouseup(e: MouseEvent): void {
     if (e.button === MouseEventButton.Middle) this.panStart = false;
   }
+
+  public onClick(e: MouseEvent): void {}
 
   public onEscape(): void {}
 }

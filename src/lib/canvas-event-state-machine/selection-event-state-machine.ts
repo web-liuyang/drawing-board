@@ -1,12 +1,10 @@
 import type { Graph } from "../graph";
 import { CanvasEventStateMachine } from "./canvas-event-state-machine";
-import { MouseEventButton } from "../constant/event";
 
 export class SelectionEventStateMachine extends CanvasEventStateMachine {
-  override onMouseup(e: MouseEvent): void {
-    super.onMouseup(e);
+  override onClick(e: MouseEvent): void {
+    super.onClick(e);
 
-    if (e.button !== MouseEventButton.Primary) return;
     const position = this.application.interactiveCanvas.toGlobal([e.offsetX, e.offsetY]);
     const graphs = this.application.graphController.graphs;
 
